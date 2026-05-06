@@ -26,54 +26,73 @@ window.dispatchEvent(new Event("fb-ready"));
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#F0EFE9;--surface:#FFF;--surface2:#EFEDE6;
-  --border:#E2DFD6;--border2:#C9C6BC;
-  --text:#18171A;--text2:#5C5A62;--text3:#9B99A4;
+  --bg:#F2F1EC;--surface:#FFFFFF;--surface2:#ECEAE3;
+  --border:#E0DDD5;--border2:#C8C5BC;
+  --text:#1A1A1F;--text2:#5A5860;--text3:#9896A1;
   --accent:#3A5EE5;--accent-bg:#EDF0FC;
   --green:#1A7A50;--green-bg:#E8F5EE;
-  --amber:#A05C00;--amber-bg:#FEF4E3;
+  --amber:#B06000;--amber-bg:#FEF4E3;
   --red:#C0253A;--red-bg:#FDEAED;
-  --r8:8px;--r12:12px;--r16:16px;
-  --shadow:0 1px 4px rgba(0,0,0,.07),0 0 1px rgba(0,0,0,.06);
-  --shadow-lg:0 8px 24px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.05);
+  /* Priority colors */
+  --pri-high:#C0253A;--pri-high-bg:#FFF3F4;--pri-high-border:#F5C2C8;
+  --pri-mid:#C47D00;--pri-mid-bg:#FFFBEA;--pri-mid-border:#F5DFA0;
+  --pri-low:#3E9A56;--pri-low-bg:#F2FDF5;--pri-low-border:#B6E8C4;
+  --r6:6px;--r8:8px;--r12:12px;--r16:16px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 0 1px rgba(0,0,0,.05);
+  --shadow-lg:0 8px 28px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
   --font:"Instrument Sans",sans-serif;--mono:monospace;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.brand{display:flex;align-items:center;gap:9px}
-.brand-icon{width:28px;height:28px;background:var(--accent);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
-.brand-name{font-size:15px;font-weight:600}
+
+/* ── Topbar ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;border-radius:var(--r8);padding:5px 8px;margin-left:-8px;transition:background .13s}
+.brand:hover{background:var(--surface2)}
+.brand-icon{width:28px;height:28px;background:var(--accent);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.brand-name{font-size:15px;font-weight:600;color:var(--text)}
 .topbar-right{display:flex;gap:8px}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r8);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .14s}
-.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{filter:brightness(1.1)}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r8);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .14s;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{filter:brightness(1.08)}
 .btn-ghost{background:none;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface2)}
-.btn-danger{background:none;color:var(--red);border:1px solid #f5c6cc}.btn-danger:hover{background:var(--red-bg)}
+.btn-danger{background:none;color:var(--red);border:1px solid var(--pri-high-border)}.btn-danger:hover{background:var(--red-bg)}
 .btn-sm{padding:5px 10px;font-size:12px}
 .btn svg{width:13px;height:13px}
-.stats-bar{padding:10px 20px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
-.stat{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--text2)}
-.dot{width:8px;height:8px;border-radius:50%}
-.num{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--text)}
-.sep{width:1px;height:16px;background:var(--border)}
-.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:14px 20px;align-items:start}
-.col{background:var(--surface2);border-radius:var(--r16);overflow:hidden;border:1px solid var(--border)}
-.col-header{padding:13px 14px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid transparent}
-.col-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
-.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
-.col-cnt{font-size:11px;font-family:var(--mono);padding:2px 8px;border-radius:20px;font-weight:600}
-.sort-bar{display:flex;gap:4px;padding:6px 10px 2px}
-.sort-btn{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text3);transition:all .12s}
+
+/* ── Stats bar ── */
+.stats-bar{padding:8px 20px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+.stat{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.num{font-family:var(--mono);font-weight:600;font-size:12.5px;color:var(--text)}
+.sep{width:1px;height:14px;background:var(--border)}
+
+/* ── Kanban ── */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;align-items:start}
+.col{background:var(--surface);border-radius:var(--r16);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
+.col-header{padding:13px 14px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.col-title{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600}
+.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.col-cnt{font-size:11px;font-family:var(--mono);padding:2px 7px;border-radius:20px;font-weight:700}
+.sort-bar{display:flex;gap:3px;padding:8px 10px 4px}
+.sort-btn{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text3);transition:all .12s}
 .sort-btn:hover{border-color:var(--border2);color:var(--text2)}
 .sort-btn.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-.col-body{padding:10px;display:flex;flex-direction:column;gap:6px;min-height:60px}
-.empty{padding:24px 10px;text-align:center;color:var(--text3);font-size:12.5px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r12);overflow:hidden;transition:box-shadow .14s,transform .14s;cursor:pointer;position:relative}
-.card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.col-body{padding:8px;display:flex;flex-direction:column;gap:5px;min-height:60px}
+.empty{padding:28px 10px;text-align:center;color:var(--text3);font-size:12.5px}
+
+/* ── Card ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r12);display:flex;align-items:stretch;overflow:hidden;transition:box-shadow .14s,transform .14s;cursor:pointer;position:relative}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.10);transform:translateY(-1px)}
 .card.done{opacity:0;transform:translateX(16px);transition:all .32s;pointer-events:none}
-.pri-bar{height:3px}
-.ph{background:var(--red)}.pm{background:var(--amber)}.pl{background:var(--green)}.pn{background:var(--border)}
-.card-inner{padding:10px 12px}
-.card-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:5px}
+/* Priority left strip */
+.pri-strip{width:4px;flex-shrink:0}
+.card-bg-high{background:var(--pri-high-bg);border-color:var(--pri-high-border)}
+.card-bg-mid{background:var(--pri-mid-bg);border-color:var(--pri-mid-border)}
+.card-bg-low{background:var(--pri-low-bg);border-color:var(--pri-low-border)}
+.sph{background:var(--pri-high)}.spm{background:var(--pri-mid)}.spl{background:var(--pri-low)}.spn{background:var(--border2)}
+.card-inner{flex:1;min-width:0;padding:10px 12px}
+.card-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px}
 .check{width:17px;height:17px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;background:none;cursor:pointer;transition:all .14s}
 .check:hover{border-color:var(--green);background:var(--green-bg)}
 .check.on{background:var(--green);border-color:var(--green)}
@@ -83,25 +102,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .card-memo{font-size:11.5px;color:var(--text2);margin-bottom:6px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tags{display:flex;flex-wrap:wrap;gap:4px}
 .tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:500}
-.tph{background:var(--red-bg);color:var(--red)}.tpm{background:var(--amber-bg);color:var(--amber)}.tpl{background:var(--green-bg);color:var(--green)}
-.tdue{background:var(--surface2);color:var(--text2)}.tdue.over{background:var(--red-bg);color:var(--red)}.tdue.today{background:var(--amber-bg);color:var(--amber)}
+.tph{background:var(--pri-high-bg);color:var(--pri-high)}.tpm{background:var(--pri-mid-bg);color:var(--pri-mid)}.tpl{background:var(--pri-low-bg);color:var(--pri-low)}
+.tdue{background:var(--surface2);color:var(--text2)}.tdue.over{background:var(--red-bg);color:var(--red);font-weight:600}.tdue.today{background:var(--amber-bg);color:var(--amber);font-weight:600}
 .card-acts{position:absolute;top:7px;right:7px;display:flex;gap:3px;opacity:0;transition:opacity .13s}
 .card:hover .card-acts{opacity:1}
-.ib{width:24px;height:24px;border-radius:var(--r8);border:none;background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .12s}
-.ib:hover{background:var(--border);color:var(--text2)}
+.ib{width:24px;height:24px;border-radius:var(--r6);border:none;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .12s;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ib:hover{background:var(--surface);color:var(--text2)}
 .ib.del:hover{background:var(--red-bg);color:var(--red)}
 .ib svg{width:12px;height:12px}
+
+/* ── Trash view ── */
 .trash-view{padding:16px 20px}
 .ti{background:var(--surface);border:1px solid var(--border);border-radius:var(--r12);padding:11px 14px;display:flex;align-items:center;gap:11px;margin-bottom:6px}
 .ti-name{flex:1;font-size:13px;color:var(--text2);text-decoration:line-through;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .18s;backdrop-filter:blur(2px)}
+
+/* ── Modals ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .18s;backdrop-filter:blur(3px)}
 .overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--surface);border-radius:var(--r16);box-shadow:var(--shadow-lg);width:460px;max-width:95vw;padding:22px;transform:translateY(8px) scale(.98);transition:transform .18s;max-height:92vh;overflow-y:auto}
+.modal{background:var(--surface);border-radius:var(--r16);box-shadow:var(--shadow-lg);width:460px;max-width:95vw;padding:24px;transform:translateY(8px) scale(.98);transition:transform .18s;max-height:92vh;overflow-y:auto}
 .overlay.open .modal{transform:none}
 .modal-title{font-size:15px;font-weight:600;margin-bottom:18px}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
 .form-row{margin-bottom:13px}
-.lbl{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.05em}
+.lbl{font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.06em}
 .inp{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--r8);font-family:var(--font);font-size:13.5px;color:var(--text);background:var(--surface);outline:none;transition:border-color .14s}
 .inp:focus{border-color:var(--accent)}
 .inp::placeholder{color:var(--text3)}
@@ -111,6 +134,8 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .sel-w select{width:100%;padding:9px 28px 9px 11px;border:1.5px solid var(--border);border-radius:var(--r8);font-family:var(--font);font-size:13.5px;color:var(--text);background:var(--surface);appearance:none;cursor:pointer;outline:none;transition:border-color .14s}
 .sel-w select:focus{border-color:var(--accent)}
 .sel-w::after{content:"";position:absolute;right:10px;top:50%;transform:translateY(-50%);border:4px solid transparent;border-top-color:var(--text3);pointer-events:none}
+
+/* ── Detail modal ── */
 .dm{width:500px}
 .dh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
 .dn{font-size:17px;font-weight:600;line-height:1.4;flex:1}
@@ -122,6 +147,8 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .di{background:var(--surface2);border-radius:var(--r8);padding:9px 11px}
 .dilbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:3px}
 .dival{font-size:13px;font-weight:500}
+
+/* ── Settings modal ── */
 .ss{border:1px solid var(--border);border-radius:var(--r12);overflow:hidden;margin-bottom:14px}
 .st{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);padding:9px 14px;background:var(--surface2);border-bottom:1px solid var(--border)}
 .sr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);gap:12px}
@@ -131,13 +158,11 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .sw{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .14s}
 .sw:hover{transform:scale(1.18)}
 .sw.sel{border-color:var(--text)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-@keyframes si{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.card{animation:si .15s ease both}
-/* Login */
-.login-overlay{position:fixed;inset:0;background:#F0EFE9;z-index:9998;display:flex;align-items:center;justify-content:center}
+
+/* ── Login ── */
+.login-overlay{position:fixed;inset:0;background:#F2F1EC;z-index:9998;display:flex;align-items:center;justify-content:center}
 .login-overlay.hidden{display:none}
-.lcard{background:var(--surface);border-radius:20px;box-shadow:0 12px 40px rgba(0,0,0,.13),0 2px 8px rgba(0,0,0,.06);width:440px;max-width:94vw;padding:32px 28px}
+.lcard{background:var(--surface);border-radius:20px;box-shadow:0 12px 40px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);width:440px;max-width:94vw;padding:32px 28px}
 .lbrand{text-align:center;margin-bottom:24px}
 .lbrand-icon{width:46px;height:46px;background:var(--accent);border-radius:13px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:22px;margin-bottom:10px}
 .lbrand-name{font-size:19px;font-weight:700}
@@ -154,10 +179,14 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .back-lnk:hover{color:var(--accent)}
 .ltitle{font-size:15px;font-weight:600;margin-bottom:14px}
 .full-btn{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r8);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .14s;margin-top:8px}
-.full-btn:hover{filter:brightness(1.1)}
+.full-btn:hover{filter:brightness(1.08)}
 .lerr{font-size:12px;color:var(--red);background:var(--red-bg);padding:8px 11px;border-radius:var(--r8);margin-bottom:10px;display:none}
 .lwarn{font-size:12px;color:var(--amber);background:var(--amber-bg);padding:8px 11px;border-radius:var(--r8);margin-bottom:12px}
 .lfirst-info{font-size:12.5px;color:var(--text2);background:var(--accent-bg);padding:9px 12px;border-radius:var(--r8);margin-bottom:14px}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@keyframes si{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{animation:si .15s ease both}
 </style>
 </head>
 <body>
@@ -211,8 +240,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   </div>
 </div>
 
+<!-- Topbar -->
 <div class="topbar">
-  <div class="brand">
+  <!-- ★ ブランド名クリックでトップに戻る -->
+  <div class="brand" onclick="goHome()" title="トップページへ戻る">
     <div class="brand-icon">&#10022;</div>
     <div class="brand-name">チームタスク管理</div>
   </div>
@@ -232,6 +263,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   </div>
 </div>
 
+<!-- Stats bar -->
 <div class="stats-bar">
   <div class="stat"><span class="dot" style="background:var(--accent)"></span>合計 <span class="num" id="st0">0</span> 件</div>
   <div class="sep"></div>
@@ -243,107 +275,107 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   <div class="stat"><span class="dot" style="background:#0E7490"></span>早坂 <span class="num" id="st6">0</span></div>
   <div class="stat"><span class="dot" style="background:#BE185D"></span>杉山 <span class="num" id="st7">0</span></div>
   <div class="sep"></div>
-  <div class="stat"><span class="dot" style="background:var(--red)"></span>高優先度 <span class="num" id="st8">0</span></div>
-  <div class="stat"><span class="dot" style="background:var(--amber)"></span>今日期限 <span class="num" id="st9">0</span></div>
+  <div class="stat"><span class="dot" style="background:var(--pri-high)"></span>高優先度 <span class="num" id="st8">0</span></div>
+  <div class="stat"><span class="dot" style="background:var(--pri-mid)"></span>今日期限 <span class="num" id="st9">0</span></div>
 </div>
 
 <div id="main">
   <div class="kanban" id="kanban">
     <!-- 鈴木 -->
     <div class="col">
-      <div class="col-header" style="border-bottom:3px solid #3A5EE5;background:linear-gradient(135deg,#EDF0FC,#f5f7ff)">
+      <div class="col-header" style="border-top:3px solid #3A5EE5">
         <div class="col-title"><div class="avatar" style="background:#3A5EE5">鈴</div>鈴木</div>
-        <span class="col-cnt" style="background:#c7d7ff;color:#3A5EE5" id="ca0">0</span>
+        <span class="col-cnt" style="background:#e8eeff;color:#3A5EE5" id="ca0">0</span>
       </div>
       <div class="sort-bar">
-        <button class="sort-btn active" onclick="setSort('a','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('a','created',this)">追加順</button>
         <button class="sort-btn" onclick="setSort('a','priority',this)">優先度順</button>
-        <button class="sort-btn" onclick="setSort('a','due',this)">期限順</button>
+        <button class="sort-btn active" onclick="setSort('a','due',this)">期限順</button>
       </div>
       <div class="col-body" id="ca"></div>
     </div>
     <!-- 十文字 -->
     <div class="col">
-      <div class="col-header" style="border-bottom:3px solid #1A7A50;background:linear-gradient(135deg,#E8F5EE,#f0faf4)">
+      <div class="col-header" style="border-top:3px solid #1A7A50">
         <div class="col-title"><div class="avatar" style="background:#1A7A50">十</div>十文字</div>
-        <span class="col-cnt" style="background:#a7f3d0;color:#1A7A50" id="cb0">0</span>
+        <span class="col-cnt" style="background:#d4f0e2;color:#1A7A50" id="cb0">0</span>
       </div>
       <div class="sort-bar">
-        <button class="sort-btn active" onclick="setSort('b','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('b','created',this)">追加順</button>
         <button class="sort-btn" onclick="setSort('b','priority',this)">優先度順</button>
-        <button class="sort-btn" onclick="setSort('b','due',this)">期限順</button>
+        <button class="sort-btn active" onclick="setSort('b','due',this)">期限順</button>
       </div>
       <div class="col-body" id="cb"></div>
     </div>
     <!-- 井上 -->
     <div class="col">
-      <div class="col-header" style="border-bottom:3px solid #C0253A;background:linear-gradient(135deg,#FDEAED,#fff5f6)">
+      <div class="col-header" style="border-top:3px solid #C0253A">
         <div class="col-title"><div class="avatar" style="background:#C0253A">井</div>井上</div>
-        <span class="col-cnt" style="background:#fecdd3;color:#C0253A" id="cc0">0</span>
+        <span class="col-cnt" style="background:#fdd5db;color:#C0253A" id="cc0">0</span>
       </div>
       <div class="sort-bar">
-        <button class="sort-btn active" onclick="setSort('c','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('c','created',this)">追加順</button>
         <button class="sort-btn" onclick="setSort('c','priority',this)">優先度順</button>
-        <button class="sort-btn" onclick="setSort('c','due',this)">期限順</button>
+        <button class="sort-btn active" onclick="setSort('c','due',this)">期限順</button>
       </div>
       <div class="col-body" id="cc"></div>
     </div>
     <!-- 早川 -->
     <div class="col">
-      <div class="col-header" style="border-bottom:3px solid #6B35C8;background:linear-gradient(135deg,#F0EAFB,#f8f5ff)">
+      <div class="col-header" style="border-top:3px solid #6B35C8">
         <div class="col-title"><div class="avatar" style="background:#6B35C8">早</div>早川</div>
-        <span class="col-cnt" style="background:#e9d5ff;color:#6B35C8" id="cd0">0</span>
+        <span class="col-cnt" style="background:#e8d8ff;color:#6B35C8" id="cd0">0</span>
       </div>
       <div class="sort-bar">
-        <button class="sort-btn active" onclick="setSort('d','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('d','created',this)">追加順</button>
         <button class="sort-btn" onclick="setSort('d','priority',this)">優先度順</button>
-        <button class="sort-btn" onclick="setSort('d','due',this)">期限順</button>
+        <button class="sort-btn active" onclick="setSort('d','due',this)">期限順</button>
       </div>
       <div class="col-body" id="cd"></div>
     </div>
     <!-- 小田切 -->
     <div class="col">
-      <div class="col-header" style="border-bottom:3px solid #A05C00;background:linear-gradient(135deg,#FEF4E3,#fff9f0)">
+      <div class="col-header" style="border-top:3px solid #A05C00">
         <div class="col-title"><div class="avatar" style="background:#A05C00">小</div>小田切</div>
-        <span class="col-cnt" style="background:#fde68a;color:#A05C00" id="ce0">0</span>
+        <span class="col-cnt" style="background:#fde8b0;color:#A05C00" id="ce0">0</span>
       </div>
       <div class="sort-bar">
-        <button class="sort-btn active" onclick="setSort('e','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('e','created',this)">追加順</button>
         <button class="sort-btn" onclick="setSort('e','priority',this)">優先度順</button>
-        <button class="sort-btn" onclick="setSort('e','due',this)">期限順</button>
+        <button class="sort-btn active" onclick="setSort('e','due',this)">期限順</button>
       </div>
       <div class="col-body" id="ce"></div>
     </div>
     <!-- 早坂 -->
     <div class="col">
-      <div class="col-header" style="border-bottom:3px solid #0E7490;background:linear-gradient(135deg,#E0F7FA,#f0fdff)">
+      <div class="col-header" style="border-top:3px solid #0E7490">
         <div class="col-title"><div class="avatar" style="background:#0E7490">坂</div>早坂</div>
-        <span class="col-cnt" style="background:#a5f3fc;color:#0E7490" id="cf0">0</span>
+        <span class="col-cnt" style="background:#b8eef8;color:#0E7490" id="cf0">0</span>
       </div>
       <div class="sort-bar">
-        <button class="sort-btn active" onclick="setSort('f','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('f','created',this)">追加順</button>
         <button class="sort-btn" onclick="setSort('f','priority',this)">優先度順</button>
-        <button class="sort-btn" onclick="setSort('f','due',this)">期限順</button>
+        <button class="sort-btn active" onclick="setSort('f','due',this)">期限順</button>
       </div>
       <div class="col-body" id="cf"></div>
     </div>
     <!-- 杉山 -->
     <div class="col">
-      <div class="col-header" style="border-bottom:3px solid #BE185D;background:linear-gradient(135deg,#FCE7F3,#fff5fa)">
+      <div class="col-header" style="border-top:3px solid #BE185D">
         <div class="col-title"><div class="avatar" style="background:#BE185D">杉</div>杉山</div>
-        <span class="col-cnt" style="background:#fbcfe8;color:#BE185D" id="cg0">0</span>
+        <span class="col-cnt" style="background:#fcd4e8;color:#BE185D" id="cg0">0</span>
       </div>
       <div class="sort-bar">
-        <button class="sort-btn active" onclick="setSort('g','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('g','created',this)">追加順</button>
         <button class="sort-btn" onclick="setSort('g','priority',this)">優先度順</button>
-        <button class="sort-btn" onclick="setSort('g','due',this)">期限順</button>
+        <button class="sort-btn active" onclick="setSort('g','due',this)">期限順</button>
       </div>
       <div class="col-body" id="cg"></div>
     </div>
   </div>
 </div>
 
-<!-- Task Modal -->
+<!-- Task Modal（期限時間フィールドを削除済み） -->
 <div class="overlay" id="task-modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-title" id="mtitle">タスクを追加</div>
@@ -367,7 +399,6 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       </select></div></div>
       <div class="form-row" style="margin:0"><label class="lbl">期限日</label><input type="date" class="inp" id="fd"></div>
     </div>
-    <div class="form-row" style="margin-top:13px"><label class="lbl">期限時間</label><input type="time" class="inp" id="ft"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
       <button class="btn btn-primary" onclick="saveTaskForm()">保存する</button>
@@ -430,8 +461,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 </div>
 
 <script>
-document.body.insertAdjacentHTML("beforeend","<div id=loading style='position:fixed;inset:0;background:#F0EFE9;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px'><div style='width:32px;height:32px;border:3px solid #E2DFD6;border-top-color:#3A5EE5;border-radius:50%;animation:spin .8s linear infinite'></div><div style='font-size:13px;color:#5C5A62'>接続中...</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style></div>");
-
+document.body.insertAdjacentHTML("beforeend","<div id=loading style='position:fixed;inset:0;background:#F2F1EC;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px'><div style='width:32px;height:32px;border:3px solid #E0DDD5;border-top-color:#3A5EE5;border-radius:50%;animation:spin .8s linear infinite'></div><div style='font-size:13px;color:#5A5860'>接続中...</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style></div>");
 const ACCENTS=["#3A5EE5","#1A7A50","#6B35C8","#C0253A","#A05C00","#0E7490","#BE185D","#374151"];
 const MEMBERS=[
   {name:'鈴木', key:'a', color:'#3A5EE5', ch:'鈴'},
@@ -442,7 +472,6 @@ const MEMBERS=[
   {name:'早坂',  key:'f', color:'#0E7490', ch:'坂'},
   {name:'杉山',  key:'g', color:'#BE185D', ch:'杉'},
 ];
-
 let tasks=[],trash=[],cats=[
   {id:"doc",  name:"資料作成",         color:"#3A5EE5"},
   {id:"est",  name:"見積書作成",       color:"#1A7A50"},
@@ -454,15 +483,15 @@ let tasks=[],trash=[],cats=[
 ];
 let appCfg={accent:"#3A5EE5"};
 let showTrash=false;
-let colSort={a:"created",b:"created",c:"created",d:"created",e:"created",f:"created",g:"created"};
+// ★ デフォルトを期限順に変更
+let colSort={a:"due",b:"due",c:"due",d:"due",e:"due",f:"due",g:"due"};
 let _db,_ref,_set,_remove,_onValue;
 let _dbReady=false;
-const _writeQueue=[]; // Firebase接続前の書き込みを蓄積するキュー
+const _writeQueue=[];
+const _pendingTasks=new Map();
 
-const _pendingTasks=new Map(); // Firebase未確定のローカルタスクを保持
 function fbSet(p,v){
   if(_dbReady)return _set(_ref(_db,p),v);
-  // Firebase未接続の場合はキューに積む
   return new Promise((res,rej)=>{_writeQueue.push({type:'set',p,v,res,rej});});
 }
 function fbDel(p){
@@ -470,30 +499,25 @@ function fbDel(p){
   _writeQueue.push({type:'del',p});
 }
 function saveTask(t){
-  // ローカルに即時反映 + 保留リストへ登録
   const idx=tasks.findIndex(x=>x.id===t.id);
   if(idx>=0)tasks[idx]=t; else tasks.push(t);
   _pendingTasks.set(t.id,t);
   refresh();
-  // Firebase書き込み → 確定後に保留リストから削除
   fbSet("team3/tasks/"+t.id,t).then(()=>{_pendingTasks.delete(t.id);}).catch(()=>{_pendingTasks.delete(t.id);});
 }
 function delTask(id){_pendingTasks.delete(id);fbDel("team3/tasks/"+id);}
 function saveTrash(t){fbSet("team3/trash/"+t.id,t);}
 function delTrash(id){fbDel("team3/trash/"+id);}
-
 function today(){return new Date().toISOString().split("T")[0]}
-function fmtDue(s,time){
+function fmtDue(s){
   if(!s)return null;
   const d=new Date(s+"T00:00:00"),t=new Date();t.setHours(0,0,0,0);
   const diff=Math.round((d-t)/86400000);
   let label=diff<0?Math.abs(diff)+"日超過":diff===0?"今日":diff===1?"明日":d.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"});
-  if(time)label+=" "+time;
   return{label,cls:diff<0?"over":diff===0?"today":""};
 }
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function refresh(){updateStats();showTrash?renderTrash():renderKanban();}
-
 function updateStats(){
   document.getElementById("st0").textContent=tasks.length;
   MEMBERS.forEach((m,i)=>{document.getElementById("st"+(i+1)).textContent=tasks.filter(t=>t.assignee===m.name).length;});
@@ -501,7 +525,6 @@ function updateStats(){
   document.getElementById("st9").textContent=tasks.filter(t=>t.due&&t.due<=today()).length;
   document.getElementById("tbtn").textContent=trash.length;
 }
-
 const _colMap={
   a:{id:"ca",name:"鈴木",  cnt:"ca0"},
   b:{id:"cb",name:"十文字",cnt:"cb0"},
@@ -511,7 +534,6 @@ const _colMap={
   f:{id:"cf",name:"早坂",  cnt:"cf0"},
   g:{id:"cg",name:"杉山",  cnt:"cg0"},
 };
-
 function renderCol(colKey){
   const col=_colMap[colKey];
   const el=document.getElementById(col.id);
@@ -526,29 +548,30 @@ function setSort(col,sort,btn){
   btn.classList.add("active");
   renderCol(col);
 }
-
 const PO={high:0,mid:1,low:2,"":3};
 function sortTasks(list,sort){
   if(sort==="priority")return [...list].sort((a,b)=>(PO[a.priority]||3)-(PO[b.priority]||3));
+  // ★ 期限順：期限なしは末尾
   if(sort==="due")return [...list].sort((a,b)=>{if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;return a.due.localeCompare(b.due);});
   return [...list].sort((a,b)=>b.createdAt-a.createdAt);
 }
-
 function renderKanban(){
   document.getElementById("kanban").style.display="grid";
   const tv=document.getElementById("trash-container");if(tv)tv.remove();
   Object.keys(_colMap).forEach(k=>renderCol(k));
 }
 
+// ★ カードに優先度別の背景色を適用
 function cardHTML(t,i){
   const cat=cats.find(c=>c.id===t.cat);
-  const due=t.due?fmtDue(t.due,t.dueTime):null;
-  const pb={high:"ph",mid:"pm",low:"pl","":"pn"};
-  const pt={high:"tph",mid:"tpm",low:"tpl"};
-  const ptl={high:"高優先度",mid:"中優先度",low:"低優先度"};
-  const m=MEMBERS.find(m=>m.name===t.assignee);
-  return `<div class="card" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
-    <div class="pri-bar ${pb[t.priority]||"pn"}"></div>
+  const due=t.due?fmtDue(t.due):null;
+  // 優先度別スタイル
+  const stripClass={high:"sph",mid:"spm",low:"spl","":"spn"}[t.priority]||"spn";
+  const bgClass={high:"card-bg-high",mid:"card-bg-mid",low:"card-bg-low"}[t.priority]||"";
+  const tagClass={high:"tph",mid:"tpm",low:"tpl"};
+  const tagLabel={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
+  return `<div class="card ${bgClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
+    <div class="pri-strip ${stripClass}"></div>
     <div class="card-inner">
       <div class="card-top">
         <div class="check" id="ck${t.id}" onclick="event.stopPropagation();complete(${t.id})">
@@ -559,7 +582,7 @@ function cardHTML(t,i){
       ${t.memo?`<div class="card-memo">${esc(t.memo)}</div>`:""}
       <div class="tags">
         ${cat?`<span class="tag" style="background:${cat.color}18;color:${cat.color}">${esc(cat.name)}</span>`:""}
-        ${t.priority?`<span class="tag ${pt[t.priority]}">${ptl[t.priority]}</span>`:""}
+        ${t.priority?`<span class="tag ${tagClass[t.priority]}">${tagLabel[t.priority]}</span>`:""}
         ${due?`<span class="tag tdue ${due.cls}">📅 ${due.label}</span>`:""}
       </div>
     </div>
@@ -589,6 +612,12 @@ function renderTrash(){
 }
 
 function toggleTrash(){showTrash=!showTrash;refresh();}
+
+// ★ トップページへ戻る
+function goHome(){
+  if(showTrash){showTrash=false;refresh();}
+}
+
 function complete(id){
   if(!confirm("このタスクを完了してゴミ箱に移動しますか？"))return;
   const ck=document.getElementById("ck"+id);const card=document.getElementById("tc"+id);
@@ -606,7 +635,7 @@ function emptyTrash(){if(!confirm("ゴミ箱を完全に空にしますか？"))
 function openDetail(id){
   const t=tasks.find(t=>t.id===id);if(!t)return;
   const cat=cats.find(c=>c.id===t.cat);
-  const due=t.due?fmtDue(t.due,t.dueTime):null;
+  const due=t.due?fmtDue(t.due):null;
   const ptMap={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
   const m=MEMBERS.find(m=>m.name===t.assignee);
   document.getElementById("d-name").textContent=t.name;
@@ -627,10 +656,12 @@ function openDetail(id){
 }
 function closeDetail(){document.getElementById("detail-modal").classList.remove("open");}
 function fillCats(){document.getElementById("fc").innerHTML='<option value="">なし</option>'+cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");}
+
+// ★ 期限時間(ft)フィールドを削除したので参照を除去
 function openAdd(){
   document.getElementById("eid").value="";document.getElementById("mtitle").textContent="タスクを追加";
   ["fn","fm"].forEach(i=>document.getElementById(i).value="");
-  ["fp","fd","ft","fa"].forEach(i=>document.getElementById(i).value="");
+  ["fp","fd","fa"].forEach(i=>document.getElementById(i).value="");
   fillCats();document.getElementById("fc").value="";
   document.getElementById("task-modal").classList.add("open");
   setTimeout(()=>document.getElementById("fn").focus(),180);
@@ -640,7 +671,7 @@ function openEdit(id){
   document.getElementById("eid").value=id;document.getElementById("mtitle").textContent="タスクを編集";
   document.getElementById("fn").value=t.name;document.getElementById("fm").value=t.memo||"";
   document.getElementById("fp").value=t.priority||"";document.getElementById("fd").value=t.due||"";
-  document.getElementById("ft").value=t.dueTime||"";document.getElementById("fa").value=t.assignee||"";
+  document.getElementById("fa").value=t.assignee||"";
   fillCats();document.getElementById("fc").value=t.cat||"";
   document.getElementById("task-modal").classList.add("open");
   setTimeout(()=>document.getElementById("fn").focus(),180);
@@ -652,7 +683,8 @@ function saveTaskForm(){
   const assignee=document.getElementById("fa").value;
   if(!assignee){const el=document.getElementById("fa").closest(".sel-w").querySelector("select");el.style.borderColor="var(--red)";el.focus();setTimeout(()=>el.style.borderColor="",1500);return;}
   const eid=document.getElementById("eid").value;
-  const data={name,memo:document.getElementById("fm").value.trim(),cat:document.getElementById("fc").value,priority:document.getElementById("fp").value,due:document.getElementById("fd").value,dueTime:document.getElementById("ft").value,assignee};
+  // ★ dueTime（期限時間）を除去
+  const data={name,memo:document.getElementById("fm").value.trim(),cat:document.getElementById("fc").value,priority:document.getElementById("fp").value,due:document.getElementById("fd").value,assignee};
   if(eid){const t=tasks.find(t=>t.id==eid);if(t){Object.assign(t,data);saveTask(t);}}
   else saveTask({id:Date.now(),createdAt:Date.now(),...data});
   closeModal();
@@ -688,17 +720,14 @@ function delCat(id){
 }
 function saveSettings(){fbSet("team3/cfg",appCfg);applyAccent();closeSettings();refresh();}
 function applyAccent(){document.documentElement.style.setProperty("--accent",appCfg.accent);document.documentElement.style.setProperty("--accent-bg",appCfg.accent+"1f");}
-
 document.addEventListener("keydown",e=>{
   const inInput=["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName);
   if(!inInput&&(e.key==="n"||e.key==="N"))openAdd();
   if(e.key==="Escape"){closeModal();closeDetail();closeSettings();}
 });
-
 function initFirebase(){
   _db=window._fb.db;_ref=window._fb.ref;_set=window._fb.set;_remove=window._fb.remove;_onValue=window._fb.onValue;
   _dbReady=true;
-  // Firebase接続前にキューされた書き込みをまとめて実行
   _writeQueue.forEach(({type,p,v,res,rej})=>{
     if(type==='set')_set(_ref(_db,p),v).then(()=>res&&res()).catch(e=>rej&&rej(e));
     else if(type==='del')_remove(_ref(_db,p));
@@ -707,7 +736,6 @@ function initFirebase(){
   _onValue(_ref(_db,"team3/tasks"),snap=>{
     const val=snap.val();
     const fbTasks=val?Object.values(val):[];
-    // Firebase未確定のローカルタスクを消さないようにマージ
     const fbIds=new Set(fbTasks.map(t=>String(t.id)));
     tasks=fbTasks.concat([..._pendingTasks.values()].filter(t=>!fbIds.has(String(t.id))));
     refresh();
@@ -733,18 +761,16 @@ else window.addEventListener("fb-ready",initFirebase);
 <script>
 // ===LOGIN SYSTEM===
 const LS_KEY='team3_auth_session';
-const SESSION_MS=2*24*60*60*1000; // 2日間
+const SESSION_MS=2*24*60*60*1000;
 let _authData={};
 let _lsUser=null;
 let _authLoaded=false;
-
 async function _sha256(s){
   const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
   return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 function _getSession(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'null');}catch{return null;}}
 function _setSession(uid,lid){localStorage.setItem(LS_KEY,JSON.stringify({userId:uid,loginId:lid,loginTime:Date.now()}));}
-
 const _UC={
   '鈴木':  {bg:'#3A5EE5',ch:'鈴'},
   '十文字':{bg:'#1A7A50',ch:'十'},
@@ -754,20 +780,18 @@ const _UC={
   '早坂':  {bg:'#0E7490',ch:'坂'},
   '杉山':  {bg:'#BE185D',ch:'杉'},
 };
-
 function _checkSession(){
   const l=document.getElementById('loading');if(l)l.style.display='none';
   const s=_getSession();
   const valid=s&&((Date.now()-s.loginTime)<SESSION_MS);
   if(valid){
-    _setSession(s.userId,s.loginId); // アクセスのたびにセッションを更新（2日間アクセスなしで期限切れ）
+    _setSession(s.userId,s.loginId);
     document.getElementById('login-overlay').classList.add('hidden');
   }else if(s&&!valid){
     lsSelectUser(s.userId,true);
   }
   _authLoaded=true;
 }
-
 function lsSelectUser(uid,expired=false){
   _lsUser=uid;
   document.getElementById('ls-step1').style.display='none';
@@ -797,15 +821,12 @@ function lsSelectUser(uid,expired=false){
     },100);
   }
 }
-
 function lsBack(){
   document.getElementById('ls-step2').style.display='none';
   document.getElementById('ls-step1').style.display='';
   _lsUser=null;
 }
-
 function _lsErr(msg){const e=document.getElementById('ls-err');e.textContent=msg;e.style.display='';setTimeout(()=>e.style.display='none',3500);}
-
 async function lsSubmitLogin(){
   const lid=document.getElementById('ls-lid').value.trim();
   const lp=document.getElementById('ls-lpass').value;
@@ -818,7 +839,6 @@ async function lsSubmitLogin(){
   _setSession(_lsUser,lid);
   document.getElementById('login-overlay').classList.add('hidden');
 }
-
 async function lsSubmitSetup(){
   const sid=document.getElementById('ls-sid').value.trim();
   const sp=document.getElementById('ls-spass').value;
@@ -833,13 +853,10 @@ async function lsSubmitSetup(){
   _setSession(_lsUser,sid);
   document.getElementById('login-overlay').classList.add('hidden');
 }
-
 document.getElementById('ls-lid').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ls-lpass').focus();});
 document.getElementById('ls-lpass').addEventListener('keydown',e=>{if(e.key==='Enter')lsSubmitLogin();});
 document.getElementById('ls-spass').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ls-spass2').focus();});
 document.getElementById('ls-spass2').addEventListener('keydown',e=>{if(e.key==='Enter')lsSubmitSetup();});
-
-// Firebaseを待たずにセッション確認→スピナー即時非表示
 _checkSession();
 </script>
 </body>
