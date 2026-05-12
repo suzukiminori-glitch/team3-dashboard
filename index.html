@@ -617,18 +617,16 @@ function cardHTML(t,i){
   const taskCatIds=getTaskCats(t);
   const taskCatObjs=taskCatIds.map(id=>cats.find(c=>c.id===id)).filter(Boolean);
   const due=t.due?fmtDue(t.due):null;
-  // 優先度別スタイル
-  const stripClass={high:"sph",mid:"spm",low:"spl","":"spn"}[t.priority]||"spn";
-  const bgClass={high:"card-bg-high",mid:"card-bg-mid",low:"card-bg-low"}[t.priority]||"";
+  // 優先度タグのみ（背景色は使わない）
   const tagClass={high:"tph",mid:"tpm",low:"tpl"};
   const tagLabel={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
-  // 期限状態チェック
+  // 期限状態チェック（こちらだけ色演出）
   const td=today();
   const isOverdue=t.due&&t.due<td;
   const isToday=t.due&&t.due===td;
   const specialClass=isOverdue?"card-overdue":isToday?"card-today":"";
-  return `<div class="card ${bgClass} ${specialClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
-    <div class="pri-strip ${stripClass}"></div>
+  return `<div class="card ${specialClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
+    <div class="pri-strip spn"></div>
     <div class="card-inner">
       <div class="card-top">
         <div class="check" id="ck${t.id}" onclick="event.stopPropagation();complete(${t.id})">
@@ -653,19 +651,49 @@ function cardHTML(t,i){
 function renderTrash(){
   document.getElementById("kanban").style.display="none";
   let tc=document.getElementById("trash-container");
-  if(!tc){tc=document.createElement("div");tc.id="trash-container";tc.className="trash-view";document.getElementById("main").appendChild(tc);}
-  if(!trash.length){tc.innerHTML='<div style="font-size:15px;font-weight:600;margin-bottom:12px">🗑️ ゴミ箱</div><div style="text-align:center;padding:48px;color:var(--text3)">ゴミ箱は空です</div>';return;}
-  tc.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:15px;font-weight:600">🗑️ ゴミ箱（${trash.length}件）</span><button class="btn btn-danger btn-sm" onclick="emptyTrash()">すべて完全削除</button></div>`+
-    trash.map(t=>{
-      const cat=cats.find(c=>c.id===t.cat);
-      return `<div class="ti">
-        <div style="flex:1;min-width:0"><div class="ti-name">${esc(t.name)}</div><div style="font-size:11px;color:var(--text3);margin-top:3px">${cat?cat.name:""}　${t.deletedAt||""}に移動</div></div>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="btn btn-ghost btn-sm" onclick="restore(${t.id})">復元</button>
-          <button class="btn btn-danger btn-sm" onclick="permDel(${t.id})">完全削除</button>
-        </div>
-      </div>`;
-    }).join("");
+  if(!tc){tc=document.createElement("div");tc.id="trash-container";document.getElementById("main").appendChild(tc);}
+  if(!trash.length){
+    tc.innerHTML='<div style="padding:16px 20px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">🗑️ ゴミ箱</div><div style="text-align:center;padding:48px;color:var(--text3)">ゴミ箱は空です</div></div>';
+    return;
+  }
+  // ヘッダー
+  let html=`<div style="padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:15px;font-weight:600">🗑️ ゴミ箱（${trash.length}件）</span>
+    <button class="btn btn-danger btn-sm" onclick="emptyTrash()">すべて完全削除</button>
+  </div>`;
+  // 担当者ごとのカンバン
+  html+=`<div class="kanban" style="align-items:start">`;
+  MEMBERS.forEach(m=>{
+    const mTrash=trash.filter(t=>t.assignee===m.name);
+    html+=`<div class="col">
+      <div class="col-header" style="border-top:3px solid ${m.color}">
+        <div class="col-title"><div class="avatar" style="background:${m.color}">${m.ch}</div>${m.name}</div>
+        <span class="col-cnt" style="background:${m.color}22;color:${m.color}">${mTrash.length}</span>
+      </div>
+      <div class="col-body">`;
+    if(!mTrash.length){html+=`<div class="empty">なし</div>`;}
+    else{
+      mTrash.forEach(t=>{
+        const due=t.due?fmtDue(t.due):null;
+        const taskCatObjs=getTaskCats(t).map(id=>cats.find(c=>c.id===id)).filter(Boolean);
+        html+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r12);padding:10px 12px;opacity:.8">
+          <div style="font-size:13px;font-weight:500;text-decoration:line-through;color:var(--text2);margin-bottom:6px;line-height:1.4">${esc(t.name)}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+            ${taskCatObjs.map(c=>`<span class="tag" style="background:${c.color}18;color:${c.color}">${esc(c.name)}</span>`).join("")}
+            ${due?`<span class="tag tdue ${due.cls}">${due.label}</span>`:""}
+            <span style="font-size:10px;color:var(--text3);display:flex;align-items:center">${t.deletedAt||""}に削除</span>
+          </div>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-ghost btn-sm" onclick="restore(${t.id})" style="flex:1;justify-content:center">復元</button>
+            <button class="btn btn-danger btn-sm" onclick="permDel(${t.id})" style="flex:1;justify-content:center">完全削除</button>
+          </div>
+        </div>`;
+      });
+    }
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+  tc.innerHTML=html;
 }
 
 function toggleTrash(){showTrash=!showTrash;refresh();}
