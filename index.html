@@ -103,7 +103,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .tags{display:flex;flex-wrap:wrap;gap:4px}
 .tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:500}
 .tph{background:var(--pri-high-bg);color:var(--pri-high)}.tpm{background:var(--pri-mid-bg);color:var(--pri-mid)}.tpl{background:var(--pri-low-bg);color:var(--pri-low)}
-.tdue{background:var(--surface2);color:var(--text2)}.tdue.over{background:var(--red-bg);color:var(--red);font-weight:600}.tdue.today{background:var(--amber-bg);color:var(--amber);font-weight:600}
+.tdue{background:var(--surface2);color:var(--text2);font-size:11.5px;padding:3px 8px}
+.tdue.tomorrow{background:#EFF6FF;color:#2563EB;font-weight:600}
+.tdue.today{background:var(--amber-bg);color:var(--amber);font-weight:700;font-size:12px}
+.tdue.over{background:var(--red-bg);color:var(--red);font-weight:700;font-size:12px}
 .card-acts{position:absolute;top:7px;right:7px;display:flex;gap:3px;opacity:0;transition:opacity .13s}
 .card:hover .card-acts{opacity:1}
 .ib{width:24px;height:24px;border-radius:var(--r6);border:none;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .12s;box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -187,6 +190,25 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 @keyframes si{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{animation:si .15s ease both}
+
+/* ── カテゴリ複数選択チップ ── */
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
+.cat-chip{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-family:var(--font);transition:all .13s}
+.cat-chip:hover{border-color:var(--border2);color:var(--text)}
+.cat-chip.sel{background:var(--chip-bg,#EDF0FC);border-color:var(--chip-color,var(--accent));color:var(--chip-color,var(--accent));font-weight:600}
+
+/* ── 期日超過カード：強い赤グロー ── */
+@keyframes overdue-pulse{
+  0%  {box-shadow:0 0 0 0 rgba(192,37,58,.7);}
+  60% {box-shadow:0 0 12px 4px rgba(192,37,58,.25);}
+  100%{box-shadow:0 0 0 0 rgba(192,37,58,.0);}
+}
+.card-overdue{
+  border:2px solid var(--pri-high) !important;
+  background:#FFF8F8 !important;
+  animation:si .15s ease both, overdue-pulse 2s ease-in-out infinite !important;
+}
+.card-overdue .pri-strip{background:var(--pri-high) !important;}
 
 /* ── 本日期限カード：グロー脈動アニメーション ── */
 @keyframes today-pulse{
@@ -395,10 +417,8 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
     <input type="hidden" id="eid">
     <div class="form-row"><label class="lbl">タスク名 <span style="color:var(--red)">*</span></label><input type="text" class="inp" id="fn" placeholder="例：株式会社〇〇"></div>
     <div class="form-row"><label class="lbl">メモ（任意）</label><textarea class="inp" id="fm" rows="2" placeholder="詳細・備考など"></textarea></div>
-    <div class="f2">
-      <div class="form-row" style="margin:0"><label class="lbl">カテゴリ</label><div class="sel-w"><select id="fc"><option value="">なし</option></select></div></div>
-      <div class="form-row" style="margin:0"><label class="lbl">優先度</label><div class="sel-w"><select id="fp"><option value="">なし</option><option value="high">🔴 高</option><option value="mid">🟡 中</option><option value="low">🟢 低</option></select></div></div>
-    </div>
+    <div class="form-row"><label class="lbl">カテゴリ（複数選択可）</label><div class="cat-chips" id="fc-chips"></div></div>
+    <div class="form-row"><label class="lbl">優先度</label><div class="sel-w"><select id="fp"><option value="">なし</option><option value="high">🔴 高</option><option value="mid">🟡 中</option><option value="low">🟢 低</option></select></div></div>
     <div class="f2" style="margin-top:13px">
       <div class="form-row" style="margin:0"><label class="lbl">担当者</label><div class="sel-w"><select id="fa">
         <option value="">未定</option>
@@ -486,13 +506,14 @@ const MEMBERS=[
   {name:'杉山',  key:'g', color:'#BE185D', ch:'杉'},
 ];
 let tasks=[],trash=[],cats=[
-  {id:"doc",  name:"資料作成",         color:"#3A5EE5"},
-  {id:"est",  name:"見積書作成",       color:"#1A7A50"},
-  {id:"sf",   name:"SF申請",           color:"#0E7490"},
-  {id:"credit",name:"与信WF申請",      color:"#A05C00"},
-  {id:"irreg",name:"イレギュラーWF申請",color:"#C0253A"},
-  {id:"demo", name:"デモ画面発行",     color:"#6B35C8"},
-  {id:"sched",name:"日程調整",         color:"#BE185D"},
+  {id:"doc",  name:"資料作成",           color:"#3A5EE5"},
+  {id:"est",  name:"見積書作成",         color:"#1A7A50"},
+  {id:"sf",   name:"SF申請",             color:"#0E7490"},
+  {id:"credit",name:"与信WF申請",        color:"#A05C00"},
+  {id:"irreg",name:"イレギュラーWF申請", color:"#C0253A"},
+  {id:"demo", name:"デモ画面発行",       color:"#6B35C8"},
+  {id:"sched",name:"日程調整",           color:"#BE185D"},
+  {id:"thanks",name:"お礼メール",        color:"#0E7490"},
 ];
 let appCfg={accent:"#3A5EE5"};
 let showTrash=false;
@@ -526,8 +547,19 @@ function fmtDue(s){
   if(!s)return null;
   const d=new Date(s+"T00:00:00"),t=new Date();t.setHours(0,0,0,0);
   const diff=Math.round((d-t)/86400000);
-  let label=diff<0?Math.abs(diff)+"日超過":diff===0?"今日":diff===1?"明日":d.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"});
-  return{label,cls:diff<0?"over":diff===0?"today":""};
+  const dateStr=d.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"});
+  let label,cls;
+  if(diff<0){label=`⚠️ ${dateStr}（${Math.abs(diff)}日超過）`;cls="over";}
+  else if(diff===0){label=`🔥 今日 ${dateStr}`;cls="today";}
+  else if(diff===1){label=`明日 ${dateStr}`;cls="tomorrow";}
+  else{label=`📅 ${dateStr}（${diff}日後）`;cls="";}
+  return{label,cls};
+}
+// タスクのカテゴリを配列で取得（旧形式との互換）
+function getTaskCats(t){
+  if(Array.isArray(t.cats))return t.cats;
+  if(t.cat)return[t.cat];
+  return[];
 }
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function refresh(){updateStats();showTrash?renderTrash():renderKanban();}
@@ -564,8 +596,14 @@ function setSort(col,sort,btn){
 const PO={high:0,mid:1,low:2,"":3};
 function sortTasks(list,sort){
   if(sort==="priority")return [...list].sort((a,b)=>(PO[a.priority]||3)-(PO[b.priority]||3));
-  // ★ 期限順：期限なしは末尾
-  if(sort==="due")return [...list].sort((a,b)=>{if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;return a.due.localeCompare(b.due);});
+  // ★ 期限順：超過→今日→近い順→なし
+  if(sort==="due")return [...list].sort((a,b)=>{
+    const td=today();
+    const ao=a.due&&a.due<td,bo=b.due&&b.due<td;
+    if(ao&&!bo)return-1;if(!ao&&bo)return 1;
+    if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;
+    return a.due.localeCompare(b.due);
+  });
   return [...list].sort((a,b)=>b.createdAt-a.createdAt);
 }
 function renderKanban(){
@@ -576,17 +614,20 @@ function renderKanban(){
 
 // ★ カードに優先度別の背景色を適用
 function cardHTML(t,i){
-  const cat=cats.find(c=>c.id===t.cat);
+  const taskCatIds=getTaskCats(t);
+  const taskCatObjs=taskCatIds.map(id=>cats.find(c=>c.id===id)).filter(Boolean);
   const due=t.due?fmtDue(t.due):null;
   // 優先度別スタイル
   const stripClass={high:"sph",mid:"spm",low:"spl","":"spn"}[t.priority]||"spn";
   const bgClass={high:"card-bg-high",mid:"card-bg-mid",low:"card-bg-low"}[t.priority]||"";
   const tagClass={high:"tph",mid:"tpm",low:"tpl"};
   const tagLabel={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
-  // 本日期限かチェック → グロー演出
-  const isToday=t.due&&t.due===today();
-  const todayClass=isToday?"card-today":"";
-  return `<div class="card ${bgClass} ${todayClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
+  // 期限状態チェック
+  const td=today();
+  const isOverdue=t.due&&t.due<td;
+  const isToday=t.due&&t.due===td;
+  const specialClass=isOverdue?"card-overdue":isToday?"card-today":"";
+  return `<div class="card ${bgClass} ${specialClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
     <div class="pri-strip ${stripClass}"></div>
     <div class="card-inner">
       <div class="card-top">
@@ -597,9 +638,9 @@ function cardHTML(t,i){
       </div>
       ${t.memo?`<div class="card-memo">${esc(t.memo)}</div>`:""}
       <div class="tags">
-        ${cat?`<span class="tag" style="background:${cat.color}18;color:${cat.color}">${esc(cat.name)}</span>`:""}
+        ${taskCatObjs.map(c=>`<span class="tag" style="background:${c.color}18;color:${c.color}">${esc(c.name)}</span>`).join("")}
         ${t.priority?`<span class="tag ${tagClass[t.priority]}">${tagLabel[t.priority]}</span>`:""}
-        ${due?`<span class="tag tdue ${due.cls}">📅 ${due.label}</span>`:""}
+        ${due?`<span class="tag tdue ${due.cls}">${due.label}</span>`:""}
       </div>
     </div>
     <div class="card-acts">
@@ -650,13 +691,13 @@ function emptyTrash(){if(!confirm("ゴミ箱を完全に空にしますか？"))
 
 function openDetail(id){
   const t=tasks.find(t=>t.id===id);if(!t)return;
-  const cat=cats.find(c=>c.id===t.cat);
+  const taskCatObjs=getTaskCats(t).map(id=>cats.find(c=>c.id===id)).filter(Boolean);
   const due=t.due?fmtDue(t.due):null;
   const ptMap={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
   const m=MEMBERS.find(m=>m.name===t.assignee);
   document.getElementById("d-name").textContent=t.name;
   let tags="";
-  if(cat)tags+=`<span class="tag" style="background:${cat.color}18;color:${cat.color};font-size:12px">${esc(cat.name)}</span>`;
+  taskCatObjs.forEach(c=>{tags+=`<span class="tag" style="background:${c.color}18;color:${c.color};font-size:12px">${esc(c.name)}</span>`;});
   if(t.priority)tags+=`<span class="tag ${t.priority==="high"?"tph":t.priority==="mid"?"tpm":"tpl"}" style="font-size:12px">${ptMap[t.priority]}</span>`;
   if(m)tags+=`<span class="tag" style="background:${m.color}18;color:${m.color};font-size:12px">👤 ${esc(t.assignee)}</span>`;
   if(due)tags+=`<span class="tag tdue ${due.cls}" style="font-size:12px">📅 ${due.label}</span>`;
@@ -666,19 +707,28 @@ function openDetail(id){
   document.getElementById("d-a").textContent=t.assignee||"未定";
   document.getElementById("d-p").textContent=ptMap[t.priority]||"なし";
   document.getElementById("d-d").textContent=due?due.label:"未設定";
-  document.getElementById("d-c").textContent=cat?cat.name:"なし";
+  document.getElementById("d-c").textContent=taskCatObjs.length?taskCatObjs.map(c=>c.name).join("、"):"なし";
   document.getElementById("d-edit").onclick=()=>{closeDetail();openEdit(id);};
   document.getElementById("detail-modal").classList.add("open");
 }
 function closeDetail(){document.getElementById("detail-modal").classList.remove("open");}
-function fillCats(){document.getElementById("fc").innerHTML='<option value="">なし</option>'+cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");}
+// ★ カテゴリをチップ形式で表示（複数選択対応）
+function fillCats(selected=[]){
+  const el=document.getElementById("fc-chips");
+  if(!el)return;
+  el.innerHTML=cats.map(c=>{
+    const isSel=selected.includes(c.id);
+    return `<button type="button" class="cat-chip${isSel?" sel":""}" data-id="${c.id}" style="--chip-color:${c.color};--chip-bg:${c.color}18" onclick="toggleCatChip(this)">${esc(c.name)}</button>`;
+  }).join("");
+}
+function toggleCatChip(el){el.classList.toggle("sel");}
+function getSelectedCatIds(){return[...document.querySelectorAll("#fc-chips .cat-chip.sel")].map(e=>e.dataset.id);}
 
-// ★ 期限時間(ft)フィールドを削除したので参照を除去
 function openAdd(){
   document.getElementById("eid").value="";document.getElementById("mtitle").textContent="タスクを追加";
   ["fn","fm"].forEach(i=>document.getElementById(i).value="");
   ["fp","fd","fa"].forEach(i=>document.getElementById(i).value="");
-  fillCats();document.getElementById("fc").value="";
+  fillCats([]);
   document.getElementById("task-modal").classList.add("open");
   setTimeout(()=>document.getElementById("fn").focus(),180);
 }
@@ -688,7 +738,7 @@ function openEdit(id){
   document.getElementById("fn").value=t.name;document.getElementById("fm").value=t.memo||"";
   document.getElementById("fp").value=t.priority||"";document.getElementById("fd").value=t.due||"";
   document.getElementById("fa").value=t.assignee||"";
-  fillCats();document.getElementById("fc").value=t.cat||"";
+  fillCats(getTaskCats(t));
   document.getElementById("task-modal").classList.add("open");
   setTimeout(()=>document.getElementById("fn").focus(),180);
 }
@@ -699,8 +749,8 @@ function saveTaskForm(){
   const assignee=document.getElementById("fa").value;
   if(!assignee){const el=document.getElementById("fa").closest(".sel-w").querySelector("select");el.style.borderColor="var(--red)";el.focus();setTimeout(()=>el.style.borderColor="",1500);return;}
   const eid=document.getElementById("eid").value;
-  // ★ dueTime（期限時間）を除去
-  const data={name,memo:document.getElementById("fm").value.trim(),cat:document.getElementById("fc").value,priority:document.getElementById("fp").value,due:document.getElementById("fd").value,assignee};
+  const selectedCats=getSelectedCatIds();
+  const data={name,memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,due:document.getElementById("fd").value,assignee};
   if(eid){const t=tasks.find(t=>t.id==eid);if(t){Object.assign(t,data);saveTask(t);}}
   else saveTask({id:Date.now(),createdAt:Date.now(),...data});
   closeModal();
@@ -717,7 +767,7 @@ function renderCatList(){
     <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)">
       <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0"></span>
       <span style="flex:1;font-size:13px">${esc(c.name)}</span>
-      <span style="font-size:11px;color:var(--text3);font-family:monospace">${tasks.filter(t=>t.cat===c.id).length}件</span>
+      <span style="font-size:11px;color:var(--text3);font-family:monospace">${tasks.filter(t=>getTaskCats(t).includes(c.id)).length}件</span>
       <button class="ib del" onclick="delCat('${c.id}')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4"/></svg></button>
     </div>`).join("")||`<div style="padding:11px 14px;font-size:12.5px;color:var(--text3)">カテゴリがありません</div>`;
 }
@@ -729,9 +779,9 @@ function addCat(){
 }
 document.getElementById("cnm").addEventListener("keydown",e=>{if(e.key==="Enter")addCat();});
 function delCat(id){
-  const cnt=tasks.filter(t=>t.cat===id).length;
+  const cnt=tasks.filter(t=>getTaskCats(t).includes(id)).length;
   if(cnt>0&&!confirm(`このカテゴリには${cnt}件のタスクがあります。削除しますか？`))return;
-  tasks.forEach(t=>{if(t.cat===id){t.cat="";saveTask(t);}});
+  tasks.forEach(t=>{const tc=getTaskCats(t);if(tc.includes(id)){t.cats=tc.filter(c=>c!==id);t.cat=t.cats[0]||"";saveTask(t);}});
   cats=cats.filter(c=>c.id!==id);fbSet("team3/cats",cats);renderCatList();refresh();
 }
 function saveSettings(){fbSet("team3/cfg",appCfg);applyAccent();closeSettings();refresh();}
@@ -761,6 +811,11 @@ function initFirebase(){
     const val=snap.val();
     if(val&&Array.isArray(val))cats=val;
     else if(val&&typeof val==="object")cats=Object.values(val);
+    // 「お礼メール」が未登録なら自動追加
+    if(!cats.find(c=>c.id==="thanks")){
+      cats.push({id:"thanks",name:"お礼メール",color:"#0E7490"});
+      fbSet("team3/cats",cats);
+    }
     refresh();
   });
   _onValue(_ref(_db,"team3/cfg"),snap=>{
