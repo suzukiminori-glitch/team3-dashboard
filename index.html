@@ -187,6 +187,19 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 @keyframes si{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{animation:si .15s ease both}
+
+/* ── 本日期限カード：グロー脈動アニメーション ── */
+@keyframes today-pulse{
+  0%  {box-shadow:0 0 0 0 rgba(220,60,40,.55), 0 0 0 0 rgba(255,120,40,.35);}
+  50% {box-shadow:0 0 14px 5px rgba(220,60,40,.30), 0 0 28px 10px rgba(255,120,40,.15);}
+  100%{box-shadow:0 0 0 0 rgba(220,60,40,.0),  0 0 0 0 rgba(255,120,40,.0);}
+}
+.card-today{
+  border:2px solid #E8401A !important;
+  animation:si .15s ease both, today-pulse 1.6s ease-in-out infinite !important;
+}
+.card-today .pri-strip{background:#E8401A !important;}
+
 </style>
 </head>
 <body>
@@ -570,7 +583,10 @@ function cardHTML(t,i){
   const bgClass={high:"card-bg-high",mid:"card-bg-mid",low:"card-bg-low"}[t.priority]||"";
   const tagClass={high:"tph",mid:"tpm",low:"tpl"};
   const tagLabel={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
-  return `<div class="card ${bgClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
+  // 本日期限かチェック → グロー演出
+  const isToday=t.due&&t.due===today();
+  const todayClass=isToday?"card-today":"";
+  return `<div class="card ${bgClass} ${todayClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
     <div class="pri-strip ${stripClass}"></div>
     <div class="card-inner">
       <div class="card-top">
