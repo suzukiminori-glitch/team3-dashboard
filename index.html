@@ -222,6 +222,23 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 }
 .card-today .pri-strip{background:#E8401A !important;}
 
+/* ── リンク添付 ── */
+.attach-preview{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+.attach-prev-item{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);max-width:220px}
+.attach-prev-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attach-prev-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;line-height:1;padding:0 2px;flex-shrink:0}
+.attach-prev-del:hover{color:var(--red)}
+.attach-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent)1a;text-decoration:none;max-width:180px}
+.attach-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Slack設定 */
+.slack-inp-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.slack-inp-row:last-child{border-bottom:none}
+.slack-av{width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.slack-name{font-size:13px;font-weight:500;width:62px;flex-shrink:0}
+.slack-url{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r8);font-family:var(--font);font-size:12px;color:var(--text);background:var(--surface);outline:none;transition:border-color .14s}
+.slack-url:focus{border-color:var(--accent)}
+.slack-url::placeholder{color:var(--text3);font-size:11.5px}
+
 </style>
 </head>
 <body>
@@ -432,9 +449,19 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       </select></div></div>
       <div class="form-row" style="margin:0"><label class="lbl">期限日</label><input type="date" class="inp" id="fd"></div>
     </div>
+    <div class="form-row" style="margin-top:13px">
+      <label class="lbl">添付リンク（Googleドライブ等）</label>
+      <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:6px;margin-bottom:6px">
+        <input type="text" class="inp" id="fattach-name" placeholder="ファイル名（例：提案書）" style="font-size:12.5px;padding:8px 10px">
+        <input type="url" class="inp" id="fattach-url" placeholder="GoogleドライブのURL" style="font-size:12.5px;padding:8px 10px">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addAttachLink()" style="white-space:nowrap">＋追加</button>
+      </div>
+      <div class="attach-preview" id="attach-preview"></div>
+      <div id="attach-existing" style="margin-top:5px"></div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
-      <button class="btn btn-primary" onclick="saveTaskForm()">保存する</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveTaskForm()">保存する</button>
     </div>
   </div>
 </div>
@@ -486,6 +513,11 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         </div>
       </div>
     </div>
+    <div class="ss">
+      <div class="st">Slack通知（個人DM）</div>
+      <div style="padding:9px 14px 8px;font-size:12px;color:var(--text2);line-height:1.5">タスク追加時にSlack DM通知を送ります。各メンバーの<a href="https://api.slack.com/apps" target="_blank" style="color:var(--accent)">Incoming Webhook URL</a>を入力してください。</div>
+      <div id="slack-webhook-list"></div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeSettings()">キャンセル</button>
       <button class="btn btn-primary" onclick="saveSettings()">保存して適用</button>
@@ -516,6 +548,7 @@ let tasks=[],trash=[],cats=[
   {id:"thanks",name:"お礼メール",        color:"#0E7490"},
 ];
 let appCfg={accent:"#3A5EE5"};
+let slackCfg={};
 let showTrash=false;
 // ★ デフォルトを期限順に変更
 let colSort={a:"due",b:"due",c:"due",d:"due",e:"due",f:"due",g:"due"};
@@ -639,6 +672,7 @@ function cardHTML(t,i){
         ${taskCatObjs.map(c=>`<span class="tag" style="background:${c.color}18;color:${c.color}">${esc(c.name)}</span>`).join("")}
         ${t.priority?`<span class="tag ${tagClass[t.priority]}">${tagLabel[t.priority]}</span>`:""}
         ${due?`<span class="tag tdue ${due.cls}">${due.label}</span>`:""}
+        ${t.attachments&&t.attachments.length?`<span class="tag" style="background:var(--accent-bg);color:var(--accent)">📎 ${t.attachments.length}件</span>`:""}
       </div>
     </div>
     <div class="card-acts">
@@ -736,6 +770,18 @@ function openDetail(id){
   document.getElementById("d-p").textContent=ptMap[t.priority]||"なし";
   document.getElementById("d-d").textContent=due?due.label:"未設定";
   document.getElementById("d-c").textContent=taskCatObjs.length?taskCatObjs.map(c=>c.name).join("、"):"なし";
+  // 添付ファイル
+  let attSec=document.getElementById("d-attach-sec");
+  if(!attSec){
+    attSec=document.createElement("div");attSec.id="d-attach-sec";attSec.className="dsec";
+    attSec.innerHTML='<div class="dlbl">添付ファイル</div><div id="d-attach-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px"></div>';
+    document.querySelector("#detail-modal .modal-footer").before(attSec);
+  }
+  const alist=document.getElementById("d-attach-list");
+  if(t.attachments&&t.attachments.length){
+    attSec.style.display="";
+    alist.innerHTML=t.attachments.map(a=>`<a href="${a.url}" target="_blank" class="attach-chip">📎 <span>${esc(a.name)}</span></a>`).join("");
+  }else{attSec.style.display="none";}
   document.getElementById("d-edit").onclick=()=>{closeDetail();openEdit(id);};
   document.getElementById("detail-modal").classList.add("open");
 }
@@ -752,11 +798,48 @@ function fillCats(selected=[]){
 function toggleCatChip(el){el.classList.toggle("sel");}
 function getSelectedCatIds(){return[...document.querySelectorAll("#fc-chips .cat-chip.sel")].map(e=>e.dataset.id);}
 
+// ── リンク添付ヘルパー ──
+let _pendingFiles=[];
+let _existingAttachments=[];
+
+function addAttachLink(){
+  const nameEl=document.getElementById("fattach-name");
+  const urlEl=document.getElementById("fattach-url");
+  const url=urlEl.value.trim();
+  if(!url){urlEl.style.borderColor="var(--red)";urlEl.focus();setTimeout(()=>urlEl.style.borderColor="",1500);return;}
+  const name=nameEl.value.trim()||"リンク"+((_pendingFiles.length+_existingAttachments.length)+1);
+  _pendingFiles.push({name,url});
+  nameEl.value="";urlEl.value="";
+  renderAttachPreview();
+}
+function renderAttachPreview(){
+  const el=document.getElementById("attach-preview");if(!el)return;
+  el.innerHTML=_pendingFiles.map((f,i)=>`<span class="attach-prev-item"><span>📎 ${esc(f.name)}</span><button class="attach-prev-del" type="button" onclick="removePendingFile(${i})">×</button></span>`).join("");
+}
+function removePendingFile(i){_pendingFiles.splice(i,1);renderAttachPreview();}
+async function uploadPendingFiles(taskId){
+  // URLリンク方式：そのまま返す（アップロード不要）
+  return _pendingFiles.slice();
+}
+function renderExistingAttachments(attachments){
+  const el=document.getElementById("attach-existing");if(!el)return;
+  if(!attachments||!attachments.length){el.innerHTML="";return;}
+  el.innerHTML=`<div style="font-size:11px;color:var(--text3);margin-bottom:4px">添付済み：</div>`+
+    attachments.map((a,i)=>`<span class="attach-prev-item" style="margin-bottom:3px">
+      <span>📎 <a href="${a.url}" target="_blank" style="color:inherit;text-decoration:none">${esc(a.name)}</a></span>
+      <button class="attach-prev-del" type="button" onclick="removeExistingAttach(${i})">×</button>
+    </span>`).join("");
+}
+function removeExistingAttach(i){_existingAttachments.splice(i,1);renderExistingAttachments(_existingAttachments);}
+
 function openAdd(){
   document.getElementById("eid").value="";document.getElementById("mtitle").textContent="タスクを追加";
   ["fn","fm"].forEach(i=>document.getElementById(i).value="");
   ["fp","fd","fa"].forEach(i=>document.getElementById(i).value="");
   fillCats([]);
+  _pendingFiles=[];_existingAttachments=[];
+  renderAttachPreview();
+  const ae=document.getElementById("attach-existing");if(ae)ae.innerHTML="";
   document.getElementById("task-modal").classList.add("open");
   setTimeout(()=>document.getElementById("fn").focus(),180);
 }
@@ -767,29 +850,61 @@ function openEdit(id){
   document.getElementById("fp").value=t.priority||"";document.getElementById("fd").value=t.due||"";
   document.getElementById("fa").value=t.assignee||"";
   fillCats(getTaskCats(t));
+  _pendingFiles=[];_existingAttachments=t.attachments?[...t.attachments]:[];
+  renderAttachPreview();renderExistingAttachments(_existingAttachments);
   document.getElementById("task-modal").classList.add("open");
   setTimeout(()=>document.getElementById("fn").focus(),180);
 }
 function closeModal(){document.getElementById("task-modal").classList.remove("open");}
-function saveTaskForm(){
+async function saveTaskForm(){
   const name=document.getElementById("fn").value.trim();
   if(!name){const el=document.getElementById("fn");el.style.borderColor="var(--red)";el.focus();setTimeout(()=>el.style.borderColor="",1500);return;}
   const assignee=document.getElementById("fa").value;
   if(!assignee){const el=document.getElementById("fa").closest(".sel-w").querySelector("select");el.style.borderColor="var(--red)";el.focus();setTimeout(()=>el.style.borderColor="",1500);return;}
   const eid=document.getElementById("eid").value;
   const selectedCats=getSelectedCatIds();
-  const data={name,memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,due:document.getElementById("fd").value,assignee};
+  const taskId=eid?Number(eid):Date.now();
+  const isNew=!eid;
+  const newAttachments=await uploadPendingFiles(taskId);
+  const attachments=[..._existingAttachments,...newAttachments];
+  const data={name,memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,due:document.getElementById("fd").value,assignee,attachments};
   if(eid){const t=tasks.find(t=>t.id==eid);if(t){Object.assign(t,data);saveTask(t);}}
-  else saveTask({id:Date.now(),createdAt:Date.now(),...data});
+  else{
+    const newTask={id:taskId,createdAt:taskId,...data};
+    saveTask(newTask);
+    sendSlackNotif(newTask);
+  }
   closeModal();
 }
 document.getElementById("fn").addEventListener("keydown",e=>{if(e.key==="Enter")saveTaskForm();});
 
+// ── Slack通知 ──
+function sendSlackNotif(task){
+  if(!task.assignee)return;
+  const url=slackCfg[task.assignee];
+  if(!url||!url.startsWith("https://"))return;
+  const catNames=getTaskCats(task).map(id=>{const c=cats.find(c=>c.id===id);return c?c.name:"";}).filter(Boolean).join(", ");
+  const priMap={high:"🔴 高",mid:"🟡 中",low:"🟢 低"};
+  const due=task.due?fmtDue(task.due):null;
+  const dueStr=due?due.label:"未設定";
+  const text=`📋 *新しいタスクが割り当てられました*\n*タスク名:* ${task.name}\n*担当者:* ${task.assignee}\n*優先度:* ${priMap[task.priority]||"なし"}\n*期限:* ${dueStr}\n*カテゴリ:* ${catNames||"なし"}${task.memo?"\n*メモ:* "+task.memo:""}`;
+  fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({payload:JSON.stringify({text})})}).catch(()=>{});
+}
+
 function openSettings(){
   document.getElementById("swatches").innerHTML=ACCENTS.map(a=>`<div class="sw ${appCfg.accent===a?"sel":""}" style="background:${a}" onclick="pickAccent('${a}',this)"></div>`).join("");
-  renderCatList();document.getElementById("settings-modal").classList.add("open");
+  renderCatList();renderSlackWebhooks();document.getElementById("settings-modal").classList.add("open");
 }
 function closeSettings(){document.getElementById("settings-modal").classList.remove("open");}
+function renderSlackWebhooks(){
+  const el=document.getElementById("slack-webhook-list");if(!el)return;
+  el.innerHTML=MEMBERS.map(m=>`
+    <div class="slack-inp-row">
+      <div class="slack-av" style="background:${m.color}">${m.ch}</div>
+      <div class="slack-name">${m.name}</div>
+      <input type="url" class="slack-url" id="sw-${m.name}" placeholder="https://hooks.slack.com/services/..." value="${esc(slackCfg[m.name]||'')}">
+    </div>`).join("");
+}
 function renderCatList(){
   document.getElementById("catlist").innerHTML=cats.map(c=>`
     <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)">
@@ -812,7 +927,17 @@ function delCat(id){
   tasks.forEach(t=>{const tc=getTaskCats(t);if(tc.includes(id)){t.cats=tc.filter(c=>c!==id);t.cat=t.cats[0]||"";saveTask(t);}});
   cats=cats.filter(c=>c.id!==id);fbSet("team3/cats",cats);renderCatList();refresh();
 }
-function saveSettings(){fbSet("team3/cfg",appCfg);applyAccent();closeSettings();refresh();}
+function saveSettings(){
+  fbSet("team3/cfg",appCfg);
+  applyAccent();
+  // Slack webhook URLを保存
+  MEMBERS.forEach(m=>{
+    const el=document.getElementById("sw-"+m.name);
+    if(el)slackCfg[m.name]=el.value.trim();
+  });
+  fbSet("team3/slack_cfg",slackCfg);
+  closeSettings();refresh();
+}
 function applyAccent(){document.documentElement.style.setProperty("--accent",appCfg.accent);document.documentElement.style.setProperty("--accent-bg",appCfg.accent+"1f");}
 document.addEventListener("keydown",e=>{
   const inInput=["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName);
@@ -848,6 +973,9 @@ function initFirebase(){
   });
   _onValue(_ref(_db,"team3/cfg"),snap=>{
     const val=snap.val();if(val)appCfg=Object.assign(appCfg,val);applyAccent();
+  });
+  _onValue(_ref(_db,"team3/slack_cfg"),snap=>{
+    const val=snap.val();if(val&&typeof val==="object")slackCfg=Object.assign({},val);
   });
   _onValue(_ref(_db,"team3/auth"),snap=>{
     const val=snap.val();if(val&&typeof val==="object")_authData=val;
