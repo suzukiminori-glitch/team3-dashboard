@@ -84,7 +84,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 /* ── Card ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r12);display:flex;align-items:stretch;overflow:hidden;transition:box-shadow .14s,transform .14s;cursor:pointer;position:relative}
 .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.10);transform:translateY(-1px)}
-.card.done{opacity:0;transform:translateX(16px);transition:all .32s;pointer-events:none}
+.card.done{animation:card-exit .5s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none;overflow:hidden;}
+@keyframes card-exit{0%{opacity:1;transform:none;max-height:300px;margin-bottom:5px;}45%{opacity:0;transform:translateX(36px) scale(.96);}100%{opacity:0;transform:translateX(36px);max-height:0;margin-bottom:-5px;padding:0;border-width:0;}}
 /* Priority left strip */
 .pri-strip{width:4px;flex-shrink:0}
 .card-bg-high{background:var(--pri-high-bg);border-color:var(--pri-high-border)}
@@ -93,12 +94,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .sph{background:var(--pri-high)}.spm{background:var(--pri-mid)}.spl{background:var(--pri-low)}.spn{background:var(--border2)}
 .card-inner{flex:1;min-width:0;padding:10px 12px}
 .card-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px}
-.check{width:17px;height:17px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;background:none;cursor:pointer;transition:all .14s}
-.check:hover{border-color:var(--green);background:var(--green-bg)}
-.check.on{background:var(--green);border-color:var(--green)}
-.ck{width:9px;height:9px;stroke:#fff;stroke-width:2.5;fill:none;display:none}
-.check.on .ck{display:block}
+.check{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;border:1.5px solid var(--green);background:var(--green-bg);cursor:pointer;font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--green);white-space:nowrap;flex-shrink:0;transition:all .15s;margin-top:0;line-height:1;}
+.check:hover{background:var(--green);color:#fff;transform:translateY(-1px);box-shadow:0 3px 10px rgba(26,122,80,.3);}
+.check.on{background:var(--green);border-color:var(--green);color:#fff;}
+.ck{width:10px;height:10px;stroke:currentColor;stroke-width:2.5;fill:none;display:inline-block;}
 .card-name{font-size:13px;font-weight:500;flex:1;line-height:1.4}
+.card-name{font-size:13px;font-weight:500;flex:1;line-height:1.4;cursor:pointer;}
 .card-memo{font-size:11.5px;color:var(--text2);margin-bottom:6px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tags{display:flex;flex-wrap:wrap;gap:4px}
 .tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:500}
@@ -230,6 +231,36 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .attach-prev-del:hover{color:var(--red)}
 .attach-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent)1a;text-decoration:none;max-width:180px}
 .attach-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ── タスク名クリック ── */
+.card-name{font-size:13px;font-weight:500;flex:1;line-height:1.4;cursor:pointer;}
+.card-name:hover{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:2px;color:var(--accent);}
+
+/* ── カレンダーポップアップ ── */
+.cal-popup{position:fixed;z-index:500;background:var(--surface);border:1px solid var(--border);border-radius:var(--r16);box-shadow:var(--shadow-lg);width:288px;padding:16px;transform:scale(.93) translateY(-6px);opacity:0;pointer-events:none;transition:all .18s cubic-bezier(.34,1.4,.64,1);}
+.cal-popup.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-nav{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text2);padding:1px 8px;border-radius:var(--r6);transition:background .12s;line-height:1;font-family:sans-serif;}
+.cal-nav:hover{background:var(--surface2);color:var(--text);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;}
+.cal-dow{text-align:center;font-size:9.5px;font-weight:700;color:var(--text3);padding:3px 0;letter-spacing:.04em;}
+.cal-dow:first-child{color:#C0253A;} .cal-dow:last-child{color:#3A5EE5;}
+.cal-day{text-align:center;font-size:12.5px;padding:5px 2px;border-radius:6px;cursor:default;color:var(--text);}
+.cal-day.today{background:var(--accent-bg);color:var(--accent);font-weight:700;border:1.5px solid var(--accent);}
+.cal-day.due{background:var(--red);color:#fff;font-weight:700;border-radius:8px;box-shadow:0 2px 6px rgba(192,37,58,.4);}
+.cal-day.today.due{background:linear-gradient(135deg,#E8401A,var(--red));color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(192,37,58,.5);}
+.cal-day.other-month{color:var(--text3);font-size:11px;}
+.cal-day.sun{color:var(--red)!important;}
+.cal-day.sat{color:var(--accent)!important;}
+.cal-task-name{font-size:12.5px;font-weight:600;text-align:center;margin-bottom:10px;color:var(--text);line-height:1.4;background:var(--surface2);padding:7px 10px;border-radius:var(--r8);word-break:break-all;}
+.cal-due-label{text-align:center;font-size:11.5px;color:var(--text2);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.cal-legend{display:flex;gap:12px;justify-content:center;margin-top:8px;font-size:10px;color:var(--text3);}
+.cal-legend-item{display:flex;align-items:center;gap:4px;}
+.cal-legend-dot{width:8px;height:8px;border-radius:2px;}
+
+/* ── 完了演出：紙吹雪 ── */
+@keyframes confetti-fall{0%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg);}100%{opacity:0;transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(.2) rotate(var(--rot));}}
+.confetti-piece{position:fixed;pointer-events:none;z-index:9999;}
+
 /* Slack設定 */
 .slack-inp-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)}
 .slack-inp-row:last-child{border-bottom:none}
@@ -494,6 +525,29 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   </div>
 </div>
 
+<!-- Calendar Popup -->
+<div id="cal-popup" class="cal-popup">
+  <div class="cal-task-name" id="cal-task-name"></div>
+  <div class="cal-header">
+    <button class="cal-nav" onclick="calPrev()">‹</button>
+    <div id="cal-month-title" style="font-size:13.5px;font-weight:700;color:var(--text)"></div>
+    <button class="cal-nav" onclick="calNext()">›</button>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-dow">日</div><div class="cal-dow">月</div><div class="cal-dow">火</div>
+    <div class="cal-dow">水</div><div class="cal-dow">木</div><div class="cal-dow">金</div><div class="cal-dow">土</div>
+    <div id="cal-grid-body" style="display:contents"></div>
+  </div>
+  <div class="cal-due-label" id="cal-due-label"></div>
+  <div class="cal-legend">
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--accent-bg);border:1.5px solid var(--accent)"></div>今日</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red)"></div>期限日</div>
+  </div>
+  <div style="text-align:center;margin-top:12px">
+    <button class="btn btn-ghost btn-sm" onclick="closeCalendar()">閉じる</button>
+  </div>
+</div>
+
 <!-- Settings Modal -->
 <div class="overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
   <div class="modal" style="width:480px">
@@ -512,6 +566,20 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
           <button class="btn btn-primary btn-sm" onclick="addCat()">追加</button>
         </div>
       </div>
+    </div>
+    <div class="ss">
+      <div class="st">Gmail通知</div>
+      <div style="padding:9px 14px 8px;font-size:12px;color:var(--text2);line-height:1.6">
+        タスク割り当て時に担当者のGmailへ通知します。<br>
+        ① <a href="https://www.emailjs.com/" target="_blank" style="color:var(--accent)">EmailJS</a>に無料登録 → Gmail連携サービス作成 → テンプレート作成<br>
+        ② テンプレート変数：<code style="font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">to_email, to_name, task_name, due_date, priority, assignee, memo</code>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 14px 10px">
+        <div><div class="lbl" style="font-size:10px">Service ID</div><input type="text" class="inp" id="ejs-service" placeholder="service_xxxxxxx" style="font-size:12px;padding:7px 9px"></div>
+        <div><div class="lbl" style="font-size:10px">Template ID</div><input type="text" class="inp" id="ejs-template" placeholder="template_xxxxxxx" style="font-size:12px;padding:7px 9px"></div>
+        <div style="grid-column:1/-1"><div class="lbl" style="font-size:10px">Public Key</div><input type="text" class="inp" id="ejs-pubkey" placeholder="EmailJS Public Key" style="font-size:12px;padding:7px 9px"></div>
+      </div>
+      <div id="email-addr-list"></div>
     </div>
     <div class="ss">
       <div class="st">Slack通知（個人DM）</div>
@@ -549,6 +617,7 @@ let tasks=[],trash=[],cats=[
 ];
 let appCfg={accent:"#3A5EE5"};
 let slackCfg={};
+let emailCfg={serviceId:"",templateId:"",pubKey:"",emails:{}};
 let showTrash=false;
 // ★ デフォルトを期限順に変更
 let colSort={a:"due",b:"due",c:"due",d:"due",e:"due",f:"due",g:"due"};
@@ -662,10 +731,10 @@ function cardHTML(t,i){
     <div class="pri-strip spn"></div>
     <div class="card-inner">
       <div class="card-top">
-        <div class="check" id="ck${t.id}" onclick="event.stopPropagation();complete(${t.id})">
-          <svg class="ck" viewBox="0 0 12 12"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>
-        </div>
-        <div class="card-name">${esc(t.name)}</div>
+        <button class="check" id="ck${t.id}" onclick="event.stopPropagation();complete(${t.id})" title="このタスクを完了にする">
+          <svg class="ck" viewBox="0 0 12 12"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>完了
+        </button>
+        <div class="card-name" onclick="event.stopPropagation();openCalendar(${t.id},event)" title="クリックでカレンダーを確認">${esc(t.name)}</div>
       </div>
       ${t.memo?`<div class="card-memo">${esc(t.memo)}</div>`:""}
       <div class="tags">
@@ -738,11 +807,98 @@ function goHome(){
 }
 
 function complete(id){
-  if(!confirm("このタスクを完了してゴミ箱に移動しますか？"))return;
   const ck=document.getElementById("ck"+id);const card=document.getElementById("tc"+id);
-  ck.classList.add("on");card.classList.add("done");
-  setTimeout(()=>{const t=tasks.find(t=>t.id===id);if(!t)return;t.deletedAt=new Date().toLocaleDateString("ja-JP");saveTrash(t);delTask(id);},340);
+  if(!ck||!card)return;
+  ck.classList.add("on");
+  const rect=card.getBoundingClientRect();
+  spawnConfetti(rect.left+rect.width/2,rect.top+rect.height/2);
+  setTimeout(()=>{card.classList.add("done");},180);
+  setTimeout(()=>{const t=tasks.find(t=>t.id===id);if(!t)return;t.deletedAt=new Date().toLocaleDateString("ja-JP");saveTrash(t);delTask(id);},680);
 }
+
+/* ── 紙吹雪エフェクト ── */
+function spawnConfetti(cx,cy){
+  const colors=["#3A5EE5","#1A7A50","#F59E0B","#C0253A","#6B35C8","#0E7490","#BE185D","#10B981"];
+  for(let i=0;i<22;i++){
+    const el=document.createElement("div");
+    el.className="confetti-piece";
+    const color=colors[i%colors.length];
+    const size=5+Math.random()*7;
+    const isCircle=Math.random()>.5;
+    const angle=(i/22)*360+(Math.random()-0.5)*30;
+    const dist=70+Math.random()*130;
+    const tx=Math.cos(angle*Math.PI/180)*dist;
+    const ty=Math.sin(angle*Math.PI/180)*dist;
+    const rot=(Math.random()-0.5)*720;
+    const dur=420+Math.random()*380;
+    el.style.cssText=`left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;background:${color};border-radius:${isCircle?"50%":"3px"};--tx:${tx}px;--ty:${ty}px;--rot:${rot}deg;animation:confetti-fall ${dur}ms ease-out forwards;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),dur+100);
+  }
+}
+
+/* ── カレンダーポップアップ ── */
+let _calTask=null,_calMonth=null;
+function openCalendar(taskId,event){
+  event.stopPropagation();
+  const t=tasks.find(t=>t.id===taskId);if(!t)return;
+  _calTask=t;
+  if(t.due){const d=new Date(t.due+"T00:00:00");_calMonth={y:d.getFullYear(),m:d.getMonth()};}
+  else{const n=new Date();_calMonth={y:n.getFullYear(),m:n.getMonth()};}
+  renderCalendar();
+  const pop=document.getElementById("cal-popup");
+  pop.classList.add("open");
+  const rect=event.target.getBoundingClientRect();
+  let left=rect.left,top=rect.bottom+8;
+  if(left+292>window.innerWidth)left=window.innerWidth-298;
+  if(top+360>window.innerHeight)top=rect.top-360;
+  if(left<4)left=4;if(top<4)top=4;
+  pop.style.left=left+"px";pop.style.top=top+"px";
+}
+function closeCalendar(){
+  const pop=document.getElementById("cal-popup");
+  if(pop)pop.classList.remove("open");
+  _calTask=null;
+}
+function renderCalendar(){
+  if(!_calTask||!_calMonth)return;
+  const {y,m}=_calMonth;
+  const todayStr=today();
+  const dueStr=_calTask.due||null;
+  document.getElementById("cal-month-title").textContent=y+"年"+(m+1)+"月";
+  document.getElementById("cal-task-name").textContent=_calTask.name;
+  const dueLabel=document.getElementById("cal-due-label");
+  if(dueStr){const due=fmtDue(dueStr);dueLabel.textContent="📅 期限："+due.label;dueLabel.style.display="";}
+  else{dueLabel.textContent="期限日は未設定です";dueLabel.style.display="";}
+  const firstDow=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const daysInPrev=new Date(y,m,0).getDate();
+  let html="";
+  for(let i=0;i<42;i++){
+    if(i<firstDow){
+      const d=daysInPrev-firstDow+i+1;
+      html+=`<div class="cal-day other-month${i%7===0?" sun":i%7===6?" sat":""}">${d}</div>`;
+    }else{
+      const d=i-firstDow+1;
+      if(d>daysInMonth){const nd=d-daysInMonth;html+=`<div class="cal-day other-month${i%7===0?" sun":i%7===6?" sat":""}">${nd}</div>`;}
+      else{
+        const ds=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+        let cls="cal-day"+(i%7===0?" sun":i%7===6?" sat":"");
+        if(ds===todayStr)cls+=" today";
+        if(ds===dueStr)cls+=" due";
+        html+=`<div class="${cls}">${d}</div>`;
+      }
+    }
+  }
+  document.getElementById("cal-grid-body").innerHTML=html;
+}
+function calPrev(){if(!_calMonth)return;let{y,m}=_calMonth;m--;if(m<0){m=11;y--;}_calMonth={y,m};renderCalendar();}
+function calNext(){if(!_calMonth)return;let{y,m}=_calMonth;m++;if(m>11){m=0;y++;}_calMonth={y,m};renderCalendar();}
+// カレンダー以外クリックで閉じる
+document.addEventListener("click",e=>{
+  const pop=document.getElementById("cal-popup");
+  if(pop&&pop.classList.contains("open")&&!pop.contains(e.target))closeCalendar();
+},{capture:true,passive:true});
 function toTrash(id){
   const card=document.getElementById("tc"+id);card.classList.add("done");
   setTimeout(()=>{const t=tasks.find(t=>t.id===id);if(!t)return;t.deletedAt=new Date().toLocaleDateString("ja-JP");saveTrash(t);delTask(id);},340);
@@ -873,218 +1029,30 @@ async function saveTaskForm(){
     const newTask={id:taskId,createdAt:taskId,...data};
     saveTask(newTask);
     sendSlackNotif(newTask);
+    sendEmailNotif(newTask);
   }
   closeModal();
 }
 document.getElementById("fn").addEventListener("keydown",e=>{if(e.key==="Enter")saveTaskForm();});
 
-// ── Slack通知 ──
-function sendSlackNotif(task){
-  if(!task.assignee)return;
-  const url=slackCfg[task.assignee];
-  if(!url||!url.startsWith("https://"))return;
-  const catNames=getTaskCats(task).map(id=>{const c=cats.find(c=>c.id===id);return c?c.name:"";}).filter(Boolean).join(", ");
-  const priMap={high:"🔴 高",mid:"🟡 中",low:"🟢 低"};
-  const due=task.due?fmtDue(task.due):null;
-  const dueStr=due?due.label:"未設定";
-  const text=`📋 *新しいタスクが割り当てられました*\n*タスク名:* ${task.name}\n*担当者:* ${task.assignee}\n*優先度:* ${priMap[task.priority]||"なし"}\n*期限:* ${dueStr}\n*カテゴリ:* ${catNames||"なし"}${task.memo?"\n*メモ:* "+task.memo:""}`;
-  fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({payload:JSON.stringify({text})})}).catch(()=>{});
-}
-
-function openSettings(){
-  document.getElementById("swatches").innerHTML=ACCENTS.map(a=>`<div class="sw ${appCfg.accent===a?"sel":""}" style="background:${a}" onclick="pickAccent('${a}',this)"></div>`).join("");
-  renderCatList();renderSlackWebhooks();document.getElementById("settings-modal").classList.add("open");
-}
-function closeSettings(){document.getElementById("settings-modal").classList.remove("open");}
-function renderSlackWebhooks(){
-  const el=document.getElementById("slack-webhook-list");if(!el)return;
+// ── Gmail通知（EmailJS） ──
+function renderEmailAddrList(){
+  const el=document.getElementById("email-addr-list");if(!el)return;
   el.innerHTML=MEMBERS.map(m=>`
     <div class="slack-inp-row">
       <div class="slack-av" style="background:${m.color}">${m.ch}</div>
       <div class="slack-name">${m.name}</div>
-      <input type="url" class="slack-url" id="sw-${m.name}" placeholder="https://hooks.slack.com/services/..." value="${esc(slackCfg[m.name]||'')}">
+      <input type="email" class="slack-url" id="em-${m.name}" placeholder="${m.name}@example.com" value="${esc(emailCfg.emails[m.name]||'')}">
     </div>`).join("");
 }
-function renderCatList(){
-  document.getElementById("catlist").innerHTML=cats.map(c=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)">
-      <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0"></span>
-      <span style="flex:1;font-size:13px">${esc(c.name)}</span>
-      <span style="font-size:11px;color:var(--text3);font-family:monospace">${tasks.filter(t=>getTaskCats(t).includes(c.id)).length}件</span>
-      <button class="ib del" onclick="delCat('${c.id}')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4"/></svg></button>
-    </div>`).join("")||`<div style="padding:11px 14px;font-size:12.5px;color:var(--text3)">カテゴリがありません</div>`;
-}
-function pickAccent(h,el){appCfg.accent=h;applyAccent();document.querySelectorAll(".sw").forEach(s=>s.classList.remove("sel"));el.classList.add("sel");}
-function addCat(){
-  const name=document.getElementById("cnm").value.trim();if(!name)return;
-  cats.push({id:"cat_"+Date.now(),name,color:document.getElementById("ccol").value});
-  document.getElementById("cnm").value="";fbSet("team3/cats",cats);renderCatList();refresh();
-}
-document.getElementById("cnm").addEventListener("keydown",e=>{if(e.key==="Enter")addCat();});
-function delCat(id){
-  const cnt=tasks.filter(t=>getTaskCats(t).includes(id)).length;
-  if(cnt>0&&!confirm(`このカテゴリには${cnt}件のタスクがあります。削除しますか？`))return;
-  tasks.forEach(t=>{const tc=getTaskCats(t);if(tc.includes(id)){t.cats=tc.filter(c=>c!==id);t.cat=t.cats[0]||"";saveTask(t);}});
-  cats=cats.filter(c=>c.id!==id);fbSet("team3/cats",cats);renderCatList();refresh();
-}
-function saveSettings(){
-  fbSet("team3/cfg",appCfg);
-  applyAccent();
-  // Slack webhook URLを保存
-  MEMBERS.forEach(m=>{
-    const el=document.getElementById("sw-"+m.name);
-    if(el)slackCfg[m.name]=el.value.trim();
-  });
-  fbSet("team3/slack_cfg",slackCfg);
-  closeSettings();refresh();
-}
-function applyAccent(){document.documentElement.style.setProperty("--accent",appCfg.accent);document.documentElement.style.setProperty("--accent-bg",appCfg.accent+"1f");}
-document.addEventListener("keydown",e=>{
-  const inInput=["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName);
-  if(!inInput&&(e.key==="n"||e.key==="N"))openAdd();
-  if(e.key==="Escape"){closeModal();closeDetail();closeSettings();}
-});
-function initFirebase(){
-  _db=window._fb.db;_ref=window._fb.ref;_set=window._fb.set;_remove=window._fb.remove;_onValue=window._fb.onValue;
-  _dbReady=true;
-  _writeQueue.forEach(({type,p,v,res,rej})=>{
-    if(type==='set')_set(_ref(_db,p),v).then(()=>res&&res()).catch(e=>rej&&rej(e));
-    else if(type==='del')_remove(_ref(_db,p));
-  });
-  _writeQueue.length=0;
-  _onValue(_ref(_db,"team3/tasks"),snap=>{
-    const val=snap.val();
-    const fbTasks=val?Object.values(val):[];
-    const fbIds=new Set(fbTasks.map(t=>String(t.id)));
-    tasks=fbTasks.concat([..._pendingTasks.values()].filter(t=>!fbIds.has(String(t.id))));
-    refresh();
-  });
-  _onValue(_ref(_db,"team3/trash"),snap=>{const val=snap.val();trash=val?Object.values(val):[];refresh();});
-  _onValue(_ref(_db,"team3/cats"),snap=>{
-    const val=snap.val();
-    if(val&&Array.isArray(val))cats=val;
-    else if(val&&typeof val==="object")cats=Object.values(val);
-    // 「お礼メール」が未登録なら自動追加
-    if(!cats.find(c=>c.id==="thanks")){
-      cats.push({id:"thanks",name:"お礼メール",color:"#0E7490"});
-      fbSet("team3/cats",cats);
-    }
-    refresh();
-  });
-  _onValue(_ref(_db,"team3/cfg"),snap=>{
-    const val=snap.val();if(val)appCfg=Object.assign(appCfg,val);applyAccent();
-  });
-  _onValue(_ref(_db,"team3/slack_cfg"),snap=>{
-    const val=snap.val();if(val&&typeof val==="object")slackCfg=Object.assign({},val);
-  });
-  _onValue(_ref(_db,"team3/auth"),snap=>{
-    const val=snap.val();if(val&&typeof val==="object")_authData=val;
-  });
-}
-if(window._fbReady)initFirebase();
-else window.addEventListener("fb-ready",initFirebase);
-</script>
-
-<script>
-// ===LOGIN SYSTEM===
-const LS_KEY='team3_auth_session';
-const SESSION_MS=2*24*60*60*1000;
-let _authData={};
-let _lsUser=null;
-let _authLoaded=false;
-async function _sha256(s){
-  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
-  return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
-}
-function _getSession(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'null');}catch{return null;}}
-function _setSession(uid,lid){localStorage.setItem(LS_KEY,JSON.stringify({userId:uid,loginId:lid,loginTime:Date.now()}));}
-const _UC={
-  '鈴木':  {bg:'#3A5EE5',ch:'鈴'},
-  '十文字':{bg:'#1A7A50',ch:'十'},
-  '井上':  {bg:'#C0253A',ch:'井'},
-  '早川':  {bg:'#6B35C8',ch:'早'},
-  '小田切':{bg:'#A05C00',ch:'小'},
-  '早坂':  {bg:'#0E7490',ch:'坂'},
-  '杉山':  {bg:'#BE185D',ch:'杉'},
-};
-function _checkSession(){
-  const l=document.getElementById('loading');if(l)l.style.display='none';
-  const s=_getSession();
-  const valid=s&&((Date.now()-s.loginTime)<SESSION_MS);
-  if(valid){
-    _setSession(s.userId,s.loginId);
-    document.getElementById('login-overlay').classList.add('hidden');
-  }else if(s&&!valid){
-    lsSelectUser(s.userId,true);
-  }
-  _authLoaded=true;
-}
-function lsSelectUser(uid,expired=false){
-  _lsUser=uid;
-  document.getElementById('ls-step1').style.display='none';
-  document.getElementById('ls-step2').style.display='';
-  document.getElementById('ls-err').style.display='none';
-  const uc=_UC[uid]||{bg:'#9B99A4',ch:uid[0]};
-  document.getElementById('ls-suc').innerHTML=`<div class="uav" style="background:${uc.bg};width:36px;height:36px;border-radius:50%;font-size:14px;font-weight:700;color:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${uc.ch}</div><div><div style="font-size:14px;font-weight:600">${uid}さん</div><div style="font-size:11px;color:var(--text3);margin-top:2px">パスワードを入力してください</div></div>`;
-  const hasAuth=_authData[uid]&&_authData[uid].passwordHash;
-  const s=_getSession();
-  if(!hasAuth){
-    document.getElementById('ls-form-login').style.display='none';
-    document.getElementById('ls-form-setup').style.display='';
-    document.getElementById('ls-sid').value='';
-    document.getElementById('ls-spass').value='';
-    document.getElementById('ls-spass2').value='';
-    setTimeout(()=>document.getElementById('ls-sid').focus(),100);
-  }else{
-    document.getElementById('ls-form-setup').style.display='none';
-    document.getElementById('ls-form-login').style.display='';
-    document.getElementById('ls-swarn').style.display=expired?'':'none';
-    const savedId=(s&&s.userId===uid)?s.loginId:'';
-    document.getElementById('ls-lid').value=savedId||'';
-    document.getElementById('ls-lpass').value='';
-    setTimeout(()=>{
-      const li=document.getElementById('ls-lid');
-      (li.value?document.getElementById('ls-lpass'):li).focus();
-    },100);
-  }
-}
-function lsBack(){
-  document.getElementById('ls-step2').style.display='none';
-  document.getElementById('ls-step1').style.display='';
-  _lsUser=null;
-}
-function _lsErr(msg){const e=document.getElementById('ls-err');e.textContent=msg;e.style.display='';setTimeout(()=>e.style.display='none',3500);}
-async function lsSubmitLogin(){
-  const lid=document.getElementById('ls-lid').value.trim();
-  const lp=document.getElementById('ls-lpass').value;
-  if(!lid||!lp){_lsErr('IDとパスワードを入力してください');return;}
-  const st=_authData[_lsUser];
-  if(!st){_lsErr('認証情報が見つかりません');return;}
-  if(lid!==st.loginId){_lsErr('ログインIDが正しくありません');return;}
-  const h=await _sha256(lp);
-  if(h!==st.passwordHash){_lsErr('パスワードが正しくありません');return;}
-  _setSession(_lsUser,lid);
-  document.getElementById('login-overlay').classList.add('hidden');
-}
-async function lsSubmitSetup(){
-  const sid=document.getElementById('ls-sid').value.trim();
-  const sp=document.getElementById('ls-spass').value;
-  const sp2=document.getElementById('ls-spass2').value;
-  if(!sid){_lsErr('ログインIDを入力してください');return;}
-  if(sp.length<4){_lsErr('パスワードは4文字以上で設定してください');return;}
-  if(sp!==sp2){_lsErr('パスワードが一致しません');return;}
-  const h=await _sha256(sp);
-  const entry={loginId:sid,passwordHash:h};
-  fbSet('team3/auth/'+_lsUser,entry);
-  _authData[_lsUser]=entry;
-  _setSession(_lsUser,sid);
-  document.getElementById('login-overlay').classList.add('hidden');
-}
-document.getElementById('ls-lid').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ls-lpass').focus();});
-document.getElementById('ls-lpass').addEventListener('keydown',e=>{if(e.key==='Enter')lsSubmitLogin();});
-document.getElementById('ls-spass').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ls-spass2').focus();});
-document.getElementById('ls-spass2').addEventListener('keydown',e=>{if(e.key==='Enter')lsSubmitSetup();});
-_checkSession();
-</script>
-</body>
-</html>
+function sendEmailNotif(task){
+  if(!task.assignee)return;
+  const email=emailCfg.emails[task.assignee];
+  if(!email||!email.includes("@"))return;
+  const sid=emailCfg.serviceId,tid=emailCfg.templateId,pk=emailCfg.pubKey;
+  if(!sid||!tid||!pk){
+    // EmailJS未設定→Gmailコンポーズを開く
+    const priMap={high:"🔴 高",mid:"🟡 中",low:"🟢 低"};
+    const due=task.due?fmtDue(task.due):null;
+    const dueStr=due?due.label:"未設定";
+    const subject=encodeURIComponent(`【タス�
