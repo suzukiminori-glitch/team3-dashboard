@@ -915,7 +915,9 @@ function showNewTaskNotification(notifs,username){
   _notifIds=notifs.map(n=>n.id);
   document.getElementById("notif-body").innerHTML=notifs.map(n=>{
     const due=n.due?fmtDue(n.due):null;
-    const taskCatObjs=(n.cats||[]).map(id=>cats.find(c=>c.id===id)).filter(Boolean);
+    // Firebaseは配列をオブジェクトに変換するため両方に対応
+    const catIds=n.cats?(Array.isArray(n.cats)?n.cats:Object.values(n.cats)):[];
+    const taskCatObjs=catIds.map(id=>cats.find(c=>c.id===id)).filter(Boolean);
     return `<div class="notif-card ${priCls[n.priority||""]}">
       <div class="notif-task-name">${esc(n.name)}</div>
       ${n.company?`<div class="notif-task-company">🏢 ${esc(n.company)}</div>`:""}
