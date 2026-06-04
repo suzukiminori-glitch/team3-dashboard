@@ -244,6 +244,29 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 @keyframes float-up{0%{opacity:1;transform:translate(-50%,-50%) scale(.7)}25%{opacity:1;transform:translate(-50%,-65%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-130%) scale(1)}}
 .streak-toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border-radius:var(--r12);padding:12px 18px;font-weight:700;font-size:14px;box-shadow:0 4px 16px rgba(217,119,6,.4);z-index:10000;animation:toast-in .3s cubic-bezier(.34,1.56,.64,1) both}
 @keyframes toast-in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+/* ── 新着タスク通知ポップアップ ── */
+.notif-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)}
+.notif-overlay.open{opacity:1;pointer-events:all}
+.notif-modal{background:var(--surface);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:500px;max-width:94vw;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(20px) scale(.95);transition:transform .3s cubic-bezier(.34,1.4,.64,1)}
+.notif-overlay.open .notif-modal{transform:none}
+.notif-header{padding:20px 24px 16px;background:linear-gradient(135deg,var(--accent),#5B7FFF);color:#fff;flex-shrink:0}
+.notif-header-top{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.notif-bell{font-size:28px;animation:bell-ring .5s ease .3s both}
+@keyframes bell-ring{0%{transform:rotate(0)}20%{transform:rotate(15deg)}40%{transform:rotate(-15deg)}60%{transform:rotate(10deg)}80%{transform:rotate(-10deg)}100%{transform:rotate(0)}}
+.notif-title{font-size:18px;font-weight:700}
+.notif-sub{font-size:13px;opacity:.85}
+.notif-body{overflow-y:auto;padding:16px 20px;flex:1}
+.notif-card{background:var(--surface2);border-radius:var(--r12);padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--accent)}
+.notif-card:last-child{margin-bottom:0}
+.notif-card.ph{border-left-color:var(--pri-high)}
+.notif-card.pm{border-left-color:var(--pri-mid)}
+.notif-card.pl{border-left-color:var(--pri-low)}
+.notif-task-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.4}
+.notif-task-company{font-size:12px;color:var(--text2);margin-bottom:6px}
+.notif-task-meta{display:flex;flex-wrap:wrap;gap:6px}
+.notif-footer{padding:16px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.notif-ok-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r12);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .14s}
+.notif-ok-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 14px rgba(58,94,229,.4)}
 </style>
 </head>
 <body>
@@ -492,6 +515,25 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
     <div id="mcal-body" class="mcal-body"></div>
   </div>
 </div>
+<!-- 新着タスク通知ポップアップ -->
+<div class="notif-overlay" id="notif-overlay">
+  <div class="notif-modal">
+    <div class="notif-header">
+      <div class="notif-header-top">
+        <div class="notif-bell">🔔</div>
+        <div>
+          <div class="notif-title" id="notif-title">新しいタスクが届いています！</div>
+          <div class="notif-sub" id="notif-sub"></div>
+        </div>
+      </div>
+    </div>
+    <div class="notif-body" id="notif-body"></div>
+    <div class="notif-footer">
+      <button class="notif-ok-btn" onclick="dismissNotifications()">✅ 確認しました！</button>
+    </div>
+  </div>
+</div>
+
 <!-- Settings Modal -->
 <div class="overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
   <div class="modal" style="width:480px">
@@ -829,10 +871,72 @@ async function saveTaskForm(){
   const attachments=[..._existingAttachments,..._pendingFiles];
   const data={name,company:document.getElementById("fcomp").value.trim(),memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,status:document.getElementById("fst").value||"todo",due:document.getElementById("fd").value,assignee,attachments};
   if(eid){const t=tasks.find(t=>t.id==eid);if(t){Object.assign(t,data);saveTask(t);}}
-  else{const newTask={id:taskId,createdAt:taskId,...data};saveTask(newTask);sendSlackNotif(newTask);}
+  else{
+    const newTask={id:taskId,createdAt:taskId,...data};
+    saveTask(newTask);
+    sendSlackNotif(newTask);
+    // 担当者への通知を保存（自分以外に割り当てた場合）
+    if(data.assignee&&data.assignee!==_currentUser){
+      fbSet("team3/notifications/"+data.assignee+"/"+taskId,{
+        id:taskId,name:data.name,company:data.company||"",priority:data.priority||"",
+        due:data.due||"",cats:data.cats||[],memo:data.memo||"",createdAt:taskId
+      });
+    }
+  }
   closeModal();
 }
 document.getElementById("fn").addEventListener("keydown",e=>{if(e.key==="Enter")saveTaskForm();});
+
+// ── 新着タスク通知 ──
+let _currentUser=null;
+let _notifIds=[];
+
+function initUserNotifications(username){
+  if(!username||!_dbReady)return;
+  _currentUser=username;
+  _onValue(_ref(_db,"team3/notifications/"+username),snap=>{
+    const val=snap.val();
+    if(val&&typeof val==="object"){
+      const notifs=Object.values(val).sort((a,b)=>b.createdAt-a.createdAt);
+      if(notifs.length>0)showNewTaskNotification(notifs,username);
+    }
+  });
+}
+
+function showNewTaskNotification(notifs,username){
+  const m=MEMBERS.find(m=>m.name===username);
+  const uc=m||{color:"#3A5EE5",ch:username[0]};
+  document.getElementById("notif-title").textContent=`📬 新しいタスクが${notifs.length}件届いています！`;
+  document.getElementById("notif-sub").textContent=`${username}さん、確認してください`;
+  // ヘッダー色をメンバーカラーに
+  document.querySelector(".notif-header").style.background=`linear-gradient(135deg,${uc.color},${uc.color}cc)`;
+  const priMap={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
+  const priCls={high:"ph",mid:"pm",low:"pl","":"pn"};
+  _notifIds=notifs.map(n=>n.id);
+  document.getElementById("notif-body").innerHTML=notifs.map(n=>{
+    const due=n.due?fmtDue(n.due):null;
+    const taskCatObjs=(n.cats||[]).map(id=>cats.find(c=>c.id===id)).filter(Boolean);
+    return `<div class="notif-card ${priCls[n.priority||""]}">
+      <div class="notif-task-name">${esc(n.name)}</div>
+      ${n.company?`<div class="notif-task-company">🏢 ${esc(n.company)}</div>`:""}
+      <div class="notif-task-meta">
+        ${n.priority?`<span class="tag ${n.priority==="high"?"tph":n.priority==="mid"?"tpm":"tpl"}">${priMap[n.priority]}</span>`:""}
+        ${due?`<span class="card-due-badge ${due.cls}" style="font-size:11.5px;padding:3px 9px">📅 ${due.label}</span>`:""}
+        ${taskCatObjs.map(c=>`<span class="tag" style="background:${c.color}18;color:${c.color}">${esc(c.name)}</span>`).join("")}
+      </div>
+      ${n.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);background:var(--surface);padding:7px 10px;border-radius:var(--r6);line-height:1.5">${esc(n.memo)}</div>`:""}
+    </div>`;
+  }).join("");
+  document.getElementById("notif-overlay").classList.add("open");
+}
+
+function dismissNotifications(){
+  document.getElementById("notif-overlay").classList.remove("open");
+  if(_currentUser&&_notifIds.length){
+    fbDel("team3/notifications/"+_currentUser);
+    _notifIds=[];
+  }
+}
 
 function sendSlackNotif(task){
   if(!task.assignee)return;
@@ -984,6 +1088,7 @@ function _checkSession(){
   if(valid){
     _setSession(s.userId,s.loginId);
     document.getElementById('login-overlay').classList.add('hidden');
+    initUserNotifications(s.userId);
   }else if(s&&!valid){
     lsSelectUser(s.userId,true);
   }
@@ -1031,6 +1136,7 @@ async function lsSubmitLogin(){
     if(h!==st.passwordHash){_lsErr('パスワードが正しくありません');return;}
     _setSession(_lsUser,lid);
     document.getElementById('login-overlay').classList.add('hidden');
+    initUserNotifications(_lsUser);
   }finally{btn.disabled=false;btn.textContent='ログイン';}
 }
 
@@ -1050,6 +1156,7 @@ async function lsSubmitSetup(){
     _authData[_lsUser]=entry;
     _setSession(_lsUser,sid);
     document.getElementById('login-overlay').classList.add('hidden');
+    initUserNotifications(_lsUser);
   }finally{btn.disabled=false;btn.textContent='設定して開始';}
 }
 
