@@ -267,6 +267,17 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .notif-footer{padding:16px 20px;border-top:1px solid var(--border);flex-shrink:0}
 .notif-ok-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r12);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .14s}
 .notif-ok-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 14px rgba(58,94,229,.4)}
+/* 期限日カスタムボタン */
+.date-pick-wrap{position:relative;width:100%}
+.date-pick-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 10px;border:1.5px solid var(--border);border-radius:var(--r8);background:var(--surface);cursor:pointer;font-family:var(--font);font-size:13.5px;font-weight:600;color:var(--text3);transition:all .14s}
+.date-pick-btn:hover{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.date-pick-btn.has-date{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.date-pick-btn .dicon{font-size:22px;line-height:1}
+#fd{position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;border:none}
+
+/* 季節デコレーション */
+.notif-deco-item{position:absolute;font-size:24px;opacity:.22;pointer-events:none;animation:deco-float 3s ease-in-out infinite}
+@keyframes deco-float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(12deg)}}
 </style>
 </head>
 <body>
@@ -418,13 +429,20 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
     <div class="modal-title" id="mtitle">タスクを追加</div>
     <input type="hidden" id="eid">
     <div class="form-row"><label class="lbl">タスク名 <span style="color:var(--red)">*</span></label><input type="text" class="inp" id="fn" placeholder="例：株式会社〇〇 見積対応"></div>
-    <div class="form-row"><label class="lbl">会社名（任意）</label><input type="text" class="inp" id="fcomp" placeholder="例：株式会社〇〇"></div>
     <div class="form-row"><label class="lbl">メモ（任意）</label><textarea class="inp" id="fm" rows="2" placeholder="詳細・備考など"></textarea></div>
     <div class="form-row"><label class="lbl">カテゴリ（複数選択可）</label><div class="cat-chips" id="fc-chips"></div></div>
-    <div class="f3" style="margin-top:13px">
+    <div class="f2" style="margin-top:13px">
       <div class="form-row" style="margin:0"><label class="lbl">優先度</label><div class="sel-w"><select id="fp"><option value="">なし</option><option value="high">🔴 高</option><option value="mid">🟡 中</option><option value="low">🟢 低</option></select></div></div>
-      <div class="form-row" style="margin:0"><label class="lbl">ステータス</label><div class="sel-w"><select id="fst"><option value="todo">未着手</option><option value="wip">対応中</option><option value="review">完了待ち</option></select></div></div>
-      <div class="form-row" style="margin:0"><label class="lbl">期限日</label><input type="date" class="inp" id="fd"></div>
+      <div class="form-row" style="margin:0">
+        <label class="lbl">期限日</label>
+        <div class="date-pick-wrap">
+          <button type="button" class="date-pick-btn" id="fd-btn" onclick="openDatePicker()">
+            <span class="dicon">📅</span>
+            <span id="fd-display">日付を選択</span>
+          </button>
+          <input type="date" id="fd" onchange="updateFdDisplay(this.value)">
+        </div>
+      </div>
     </div>
     <div class="form-row" style="margin-top:13px"><label class="lbl">担当者 <span style="color:var(--red)">*</span></label><div class="sel-w"><select id="fa"><option value="">未定</option><option value="鈴木">鈴木</option><option value="十文字">十文字</option><option value="井上">井上</option><option value="早川">早川</option><option value="小田切">小田切</option><option value="早坂">早坂</option><option value="杉山">杉山</option></select></div></div>
     <div class="form-row">
@@ -518,9 +536,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 <!-- 新着タスク通知ポップアップ -->
 <div class="notif-overlay" id="notif-overlay">
   <div class="notif-modal">
-    <div class="notif-header">
-      <div class="notif-header-top">
-        <div class="notif-bell">🔔</div>
+    <div class="notif-header" style="position:relative;overflow:hidden">
+      <div id="notif-deco" style="position:absolute;inset:0;pointer-events:none"></div>
+      <div class="notif-header-top" style="position:relative;z-index:1">
+        <div class="notif-bell" id="notif-bell">🔔</div>
         <div>
           <div class="notif-title" id="notif-title">新しいタスクが届いています！</div>
           <div class="notif-sub" id="notif-sub"></div>
@@ -815,6 +834,23 @@ function fillCats(selected=[]){
 function toggleCatChip(el){el.classList.toggle("sel");}
 function getSelectedCatIds(){return[...document.querySelectorAll("#fc-chips .cat-chip.sel")].map(e=>e.dataset.id);}
 
+function openDatePicker(){
+  const inp=document.getElementById("fd");
+  try{inp.showPicker();}catch(e){inp.click();}
+}
+function updateFdDisplay(val){
+  const disp=document.getElementById("fd-display");
+  const btn=document.getElementById("fd-btn");
+  if(!disp||!btn)return;
+  if(val){
+    const d=new Date(val+"T00:00:00");
+    const str=d.toLocaleDateString("ja-JP",{month:"numeric",day:"numeric",weekday:"short"});
+    disp.textContent=str;btn.classList.add("has-date");
+  }else{
+    disp.textContent="日付を選択";btn.classList.remove("has-date");
+  }
+}
+
 let _pendingFiles=[],_existingAttachments=[];
 function addAttachLink(){
   const nameEl=document.getElementById("fattach-name");const urlEl=document.getElementById("fattach-url");
@@ -837,9 +873,9 @@ function removeExistingAttach(i){_existingAttachments.splice(i,1);renderExisting
 
 function openAdd(){
   document.getElementById("eid").value="";document.getElementById("mtitle").textContent="タスクを追加";
-  ["fn","fm","fcomp"].forEach(i=>document.getElementById(i).value="");
+  ["fn","fm"].forEach(i=>document.getElementById(i).value="");
   ["fp","fd","fa"].forEach(i=>document.getElementById(i).value="");
-  document.getElementById("fst").value="todo";
+  updateFdDisplay("");
   fillCats([]);_pendingFiles=[];_existingAttachments=[];renderAttachPreview();
   const ae=document.getElementById("attach-existing");if(ae)ae.innerHTML="";
   document.getElementById("task-modal").classList.add("open");
@@ -849,10 +885,9 @@ function openEdit(id){
   const t=tasks.find(t=>t.id===id);if(!t)return;
   document.getElementById("eid").value=id;document.getElementById("mtitle").textContent="タスクを編集";
   document.getElementById("fn").value=t.name;document.getElementById("fm").value=t.memo||"";
-  document.getElementById("fcomp").value=t.company||"";
-  document.getElementById("fp").value=t.priority||"";document.getElementById("fd").value=t.due||"";
+  document.getElementById("fp").value=t.priority||"";
+  document.getElementById("fd").value=t.due||"";updateFdDisplay(t.due||"");
   document.getElementById("fa").value=t.assignee||"";
-  document.getElementById("fst").value=t.status||"todo";
   fillCats(getTaskCats(t));
   _pendingFiles=[];_existingAttachments=t.attachments?[...t.attachments]:[];
   renderAttachPreview();renderExistingAttachments(_existingAttachments);
@@ -869,8 +904,9 @@ async function saveTaskForm(){
   const selectedCats=getSelectedCatIds();
   const taskId=eid?Number(eid):Date.now();
   const attachments=[..._existingAttachments,..._pendingFiles];
-  const data={name,company:document.getElementById("fcomp").value.trim(),memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,status:document.getElementById("fst").value||"todo",due:document.getElementById("fd").value,assignee,attachments};
-  if(eid){const t=tasks.find(t=>t.id==eid);if(t){Object.assign(t,data);saveTask(t);}}
+  const existingTask=eid?tasks.find(t=>t.id==eid):null;
+  const data={name,company:existingTask?existingTask.company||"":"",memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,status:existingTask?existingTask.status||"todo":"todo",due:document.getElementById("fd").value,assignee,attachments};
+  if(existingTask){Object.assign(existingTask,data);saveTask(existingTask);}
   else{
     const newTask={id:taskId,createdAt:taskId,...data};
     saveTask(newTask);
@@ -886,6 +922,22 @@ async function saveTaskForm(){
   closeModal();
 }
 document.getElementById("fn").addEventListener("keydown",e=>{if(e.key==="Enter")saveTaskForm();});
+
+// ── 季節テーマ ──
+const SEASON_THEMES={
+  1: {g:"linear-gradient(135deg,#C0253A,#E8401A)",bell:"🎍",sub:"謹賀新年🎊",deco:["🎊","🎋","⛩️","🎍","🎏"]},
+  2: {g:"linear-gradient(135deg,#BE185D,#F472B6)",bell:"💝",sub:"バレンタイン月間💕",deco:["❤️","💝","🍫","💕","🌹"]},
+  3: {g:"linear-gradient(135deg,#DB2777,#F9A8D4)",bell:"🌸",sub:"春がきた🌸",deco:["🌸","🌸","🌷","🎎","🌸"]},
+  4: {g:"linear-gradient(135deg,#7C3AED,#C084FC)",bell:"🌸",sub:"花見シーズン🌸",deco:["🌸","🌺","🌷","✨","🌸"]},
+  5: {g:"linear-gradient(135deg,#15803D,#4ADE80)",bell:"🎏",sub:"GW・新緑の季節🌿",deco:["🎏","🌿","🎋","🌻","🍃"]},
+  6: {g:"linear-gradient(135deg,#1D4ED8,#60A5FA)",bell:"☔",sub:"梅雨の季節☔",deco:["☔","💧","🌧️","🌂","💙"]},
+  7: {g:"linear-gradient(135deg,#1E3A8A,#6366F1)",bell:"🎋",sub:"七夕・夏本番⭐",deco:["⭐","🎋","🌟","💫","🌠"]},
+  8: {g:"linear-gradient(135deg,#C2410C,#FB923C)",bell:"🎆",sub:"真夏！熱中症注意🌻",deco:["🎆","🌻","🏖️","🍧","🎇"]},
+  9: {g:"linear-gradient(135deg,#92400E,#F59E0B)",bell:"🌕",sub:"お月見シーズン🍡",deco:["🌕","🍂","🍡","🐇","🌾"]},
+  10:{g:"linear-gradient(135deg,#7C2D12,#EA580C)",bell:"🎃",sub:"ハッピーハロウィン👻",deco:["🎃","👻","🕷️","🦇","🍬"]},
+  11:{g:"linear-gradient(135deg,#78350F,#D97706)",bell:"🍁",sub:"秋の紅葉🍂",deco:["🍁","🍂","🌾","🍄","🦔"]},
+  12:{g:"linear-gradient(135deg,#15803D,#22C55E)",bell:"🎄",sub:"メリークリスマス🎅",deco:["🎄","⛄","🎅","✨","🎁"]},
+};
 
 // ── 新着タスク通知 ──
 let _currentUser=null;
@@ -904,12 +956,21 @@ function initUserNotifications(username){
 }
 
 function showNewTaskNotification(notifs,username){
-  const m=MEMBERS.find(m=>m.name===username);
-  const uc=m||{color:"#3A5EE5",ch:username[0]};
+  const month=new Date().getMonth()+1;
+  const theme=SEASON_THEMES[month];
   document.getElementById("notif-title").textContent=`📬 新しいタスクが${notifs.length}件届いています！`;
-  document.getElementById("notif-sub").textContent=`${username}さん、確認してください`;
-  // ヘッダー色をメンバーカラーに
-  document.querySelector(".notif-header").style.background=`linear-gradient(135deg,${uc.color},${uc.color}cc)`;
+  document.getElementById("notif-sub").textContent=`${username}さん、確認してください ／ ${theme.sub}`;
+  document.querySelector(".notif-header").style.background=theme.g;
+  document.getElementById("notif-bell").textContent=theme.bell;
+  // 季節デコレーション（浮遊絵文字）
+  const positions=[[8,15],[22,55],[40,20],[60,60],[78,25],[92,50]];
+  document.getElementById("notif-deco").innerHTML=theme.deco.map((e,i)=>{
+    const[left,top]=positions[i%positions.length];
+    return `<span class="notif-deco-item" style="left:${left}%;top:${top}%;animation-delay:${i*0.35}s;animation-duration:${2.5+i*0.3}s">${e}</span>`;
+  }).join("");
+  // OKボタンの色も季節に合わせる
+  const okBtn=document.querySelector(".notif-ok-btn");
+  okBtn.style.background=theme.g;
   const priMap={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
   const priCls={high:"ph",mid:"pm",low:"pl","":"pn"};
   _notifIds=notifs.map(n=>n.id);
