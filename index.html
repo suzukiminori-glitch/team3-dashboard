@@ -434,8 +434,9 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
     <div class="form-row"><label class="lbl">タスク名 <span style="color:var(--red)">*</span></label><input type="text" class="inp" id="fn" placeholder="例：株式会社〇〇 見積対応"></div>
     <div class="form-row"><label class="lbl">メモ（任意）</label><textarea class="inp" id="fm" rows="2" placeholder="詳細・備考など"></textarea></div>
     <div class="form-row"><label class="lbl">カテゴリ（複数選択可）</label><div class="cat-chips" id="fc-chips"></div></div>
-    <div class="f2" style="margin-top:13px">
+    <div class="f3" style="margin-top:13px">
       <div class="form-row" style="margin:0"><label class="lbl">優先度</label><div class="sel-w"><select id="fp"><option value="">なし</option><option value="high">🔴 高</option><option value="mid">🟡 中</option><option value="low">🟢 低</option></select></div></div>
+      <div class="form-row" style="margin:0"><label class="lbl">ステータス</label><div class="sel-w"><select id="fst"><option value="todo">未着手</option><option value="wip">対応中</option><option value="review">完了待ち</option></select></div></div>
       <div class="form-row" style="margin:0">
         <label class="lbl">期限日</label>
         <div class="date-pick-wrap">
@@ -876,6 +877,7 @@ function openAdd(){
   document.getElementById("eid").value="";document.getElementById("mtitle").textContent="タスクを追加";
   ["fn","fm"].forEach(i=>document.getElementById(i).value="");
   ["fp","fd","fa"].forEach(i=>document.getElementById(i).value="");
+  document.getElementById("fst").value="todo";
   updateFdDisplay("");
   fillCats([]);_pendingFiles=[];_existingAttachments=[];renderAttachPreview();
   const ae=document.getElementById("attach-existing");if(ae)ae.innerHTML="";
@@ -887,6 +889,7 @@ function openEdit(id){
   document.getElementById("eid").value=id;document.getElementById("mtitle").textContent="タスクを編集";
   document.getElementById("fn").value=t.name;document.getElementById("fm").value=t.memo||"";
   document.getElementById("fp").value=t.priority||"";
+  document.getElementById("fst").value=t.status||"todo";
   document.getElementById("fd").value=t.due||"";updateFdDisplay(t.due||"");
   document.getElementById("fa").value=t.assignee||"";
   fillCats(getTaskCats(t));
@@ -906,7 +909,7 @@ async function saveTaskForm(){
   const taskId=eid?Number(eid):Date.now();
   const attachments=[..._existingAttachments,..._pendingFiles];
   const existingTask=eid?tasks.find(t=>t.id==eid):null;
-  const data={name,company:existingTask?existingTask.company||"":"",memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,status:existingTask?existingTask.status||"todo":"todo",due:document.getElementById("fd").value,assignee,attachments};
+  const data={name,company:existingTask?existingTask.company||"":"",memo:document.getElementById("fm").value.trim(),cats:selectedCats,cat:selectedCats[0]||"",priority:document.getElementById("fp").value,status:document.getElementById("fst").value||"todo",due:document.getElementById("fd").value,assignee,attachments};
   if(existingTask){Object.assign(existingTask,data);saveTask(existingTask);}
   else{
     const newTask={id:taskId,createdAt:taskId,...data};
