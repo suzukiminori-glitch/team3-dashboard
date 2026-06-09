@@ -7,7 +7,6 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>チームタスク管理</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -42,7 +41,7 @@ window.dispatchEvent(new Event("fb-ready"));
   --r6:6px;--r8:8px;--r12:12px;--r16:16px;
   --shadow:0 1px 3px rgba(0,0,0,.08),0 0 1px rgba(0,0,0,.05);
   --shadow-lg:0 8px 28px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
-  --font:"Instrument Sans",sans-serif;--mono:monospace;
+  --font:"Yu Gothic UI","游ゴシック UI","Yu Gothic","游ゴシック",YuGothic,-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;--mono:monospace;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
@@ -62,7 +61,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .num{font-family:var(--mono);font-weight:600;font-size:12.5px;color:var(--text)}
 .sep{width:1px;height:14px;background:var(--border)}
-.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;align-items:start}
+.kanban{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding:14px 16px;align-items:start}
 .col{background:var(--surface);border-radius:var(--r16);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
 .col-header{padding:13px 14px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
 .col-title{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;cursor:pointer;border-radius:var(--r8);padding:3px 6px;margin:-3px -6px;transition:background .13s}
@@ -81,12 +80,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 @keyframes card-exit{0%{opacity:1;transform:none;max-height:300px;margin-bottom:5px}45%{opacity:0;transform:translateX(36px) scale(.96)}100%{opacity:0;transform:translateX(36px);max-height:0;margin-bottom:-5px;padding:0;border-width:0}}
 .pri-strip{width:4px;flex-shrink:0}
 .sph{background:var(--pri-high)}.spm{background:var(--pri-mid)}.spl{background:var(--pri-low)}.spn{background:var(--border2)}
-.card-inner{flex:1;min-width:0;padding:10px 12px}
+.card-inner{flex:1;min-width:0;padding:9px 10px}
 .card-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px}
 .check{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;border:1.5px solid var(--green);background:var(--green-bg);cursor:pointer;font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--green);white-space:nowrap;flex-shrink:0;transition:all .15s;line-height:1}
 .check:hover{background:var(--green);color:#fff;transform:translateY(-1px);box-shadow:0 3px 10px rgba(26,122,80,.3)}
 .ck{width:10px;height:10px;stroke:currentColor;stroke-width:2.5;fill:none;display:inline-block}
-.card-name{font-size:13px;font-weight:500;flex:1;line-height:1.4}
+.card-name{font-size:13.5px;font-weight:600;flex:1;line-height:1.4}
 .card-company{font-size:11px;color:var(--text3);margin-bottom:3px;font-weight:500}
 .card-memo{font-size:11.5px;color:var(--text2);margin-bottom:6px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tags{display:flex;flex-wrap:wrap;gap:4px}
@@ -156,7 +155,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .lbrand-icon{width:46px;height:46px;background:var(--accent);border-radius:13px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:22px;margin-bottom:10px}
 .lbrand-name{font-size:19px;font-weight:700}
 .lbrand-sub{font-size:12px;color:var(--text3);margin-top:3px}
-.ugrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:4px}
+.ugrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:4px}
 .ubtn{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r12);padding:12px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .14s;font-family:var(--font);text-align:left;width:100%}
 .ubtn:hover{border-color:var(--accent);background:var(--accent-bg);transform:translateY(-2px);box-shadow:var(--shadow)}
 .ubtn .uav{width:32px;height:32px;border-radius:50%;font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -173,6 +172,62 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .lwarn{font-size:12px;color:var(--amber);background:var(--amber-bg);padding:8px 11px;border-radius:var(--r8);margin-bottom:12px}
 .lfirst-info{font-size:12.5px;color:var(--text2);background:var(--accent-bg);padding:9px 12px;border-radius:var(--r8);margin-bottom:14px}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+/* ── 月次カレンダー ── */
+.cal-modal{background:var(--surface);border-radius:var(--r16);box-shadow:var(--shadow-lg);width:900px;max-width:97vw;max-height:90vh;display:flex;flex-direction:column;transform:translateY(8px) scale(.98);transition:transform .18s;overflow:hidden}
+.cal-overlay.open .cal-modal{transform:none}
+.cal-head{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cal-nav{display:flex;align-items:center;gap:10px}
+.cal-nav-btn{width:30px;height:30px;border-radius:var(--r8);border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .12s}
+.cal-nav-btn:hover{background:var(--surface2)}
+.cal-month-label{font-size:16px;font-weight:700;min-width:120px;text-align:center}
+.cal-body{overflow-y:auto;flex:1;padding:12px 16px}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.cal-wd{text-align:center;font-size:11px;font-weight:700;color:var(--text3);padding:4px 0;text-transform:uppercase}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{min-height:80px;border:1px solid var(--border);border-radius:var(--r8);padding:5px 6px;background:var(--surface);transition:background .12s}
+.cal-day:hover{background:var(--surface2)}
+.cal-day.today{border-color:var(--accent);background:var(--accent-bg)}
+.cal-day.other-month{background:#FAFAF8;opacity:.6}
+.cal-day-num{font-size:11.5px;font-weight:600;color:var(--text3);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.cal-day.today .cal-day-num{color:var(--accent)}
+.cal-task-dot{display:flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:opacity .1s}
+.cal-task-dot:hover{opacity:.8}
+.cal-more{font-size:10px;color:var(--text3);padding:1px 3px}
+.cal-legend{display:flex;gap:12px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.cal-legend-dot{width:10px;height:10px;border-radius:50%}
+/* ── ストリークゲーム ── */
+.streak-hud{position:fixed;bottom:24px;right:24px;z-index:9000;display:none;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
+.streak-hud.show{display:flex}
+.streak-chip{background:linear-gradient(135deg,#FF6B00,#FF3366);color:#fff;border-radius:30px;padding:8px 18px 8px 14px;font-size:13px;font-weight:700;box-shadow:0 4px 16px rgba(255,60,0,.4);animation:streak-in .35s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:6px}
+@keyframes streak-in{from{opacity:0;transform:translateX(40px) scale(.8)}to{opacity:1;transform:none}}
+.streak-bar-wrap{background:rgba(0,0,0,.15);border-radius:20px;height:4px;width:120px;margin-top:2px;overflow:hidden}
+.streak-bar-fill{height:100%;background:rgba(255,255,255,.9);border-radius:20px;transition:width .3s ease}
+@keyframes milestone-flash{0%{opacity:0;transform:scale(.5)}20%{opacity:1;transform:scale(1.15)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.05)}}
+.milestone-pop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;pointer-events:none;animation:milestone-flash .9s ease forwards}
+.milestone-inner{background:linear-gradient(135deg,#FF6B00,#FF3366);color:#fff;border-radius:20px;padding:20px 40px;text-align:center;box-shadow:0 20px 60px rgba(255,60,0,.5)}
+.milestone-emoji{font-size:48px;display:block;margin-bottom:8px}
+.milestone-text{font-size:22px;font-weight:800}
+.milestone-sub{font-size:13px;opacity:.85;margin-top:4px}
+/* ── アップデート通知 ── */
+.update-btn{position:relative}
+.update-dot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--surface);display:none}
+.update-dot.show{display:block;animation:dot-pop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes dot-pop{from{transform:scale(0)}to{transform:scale(1)}}
+/* Changelog modal */
+.cl-modal{background:var(--surface);border-radius:var(--r16);box-shadow:var(--shadow-lg);width:500px;max-width:95vw;max-height:82vh;display:flex;flex-direction:column;transform:translateY(8px) scale(.98);transition:transform .18s}
+.cl-overlay.open .cl-modal{transform:none}
+.cl-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cl-body{overflow-y:auto;padding:4px 22px 8px;flex:1}
+.cl-entry{padding:16px 0;border-bottom:1px solid var(--border)}
+.cl-entry:last-child{border-bottom:none}
+.cl-entry-head{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+.cl-ver-badge{background:var(--accent-bg);color:var(--accent);font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;border:1px solid #C5D0F8}
+.cl-entry-date{font-size:11px;color:var(--text3)}
+.cl-new-badge{background:var(--red-bg);color:var(--red);font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;border:1px solid var(--pri-high-border)}
+.cl-entry-title{font-size:13.5px;font-weight:600;margin-bottom:6px}
+.cl-entry-items{font-size:12.5px;color:var(--text2);line-height:1.9;white-space:pre-line}
+.cl-foot{padding:12px 22px;border-top:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:flex-end}
 @keyframes si{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{animation:si .15s ease both}
 .cat-chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
@@ -299,7 +354,6 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         <button class="ubtn" onclick="lsSelectUser('早川')"><div class="uav" style="background:#6B35C8">早</div><div><div class="ubtn-name">早川</div><div class="ubtn-sub">ログイン</div></div></button>
         <button class="ubtn" onclick="lsSelectUser('小田切')"><div class="uav" style="background:#A05C00">小</div><div><div class="ubtn-name">小田切</div><div class="ubtn-sub">ログイン</div></div></button>
         <button class="ubtn" onclick="lsSelectUser('早坂')"><div class="uav" style="background:#0E7490">坂</div><div><div class="ubtn-name">早坂</div><div class="ubtn-sub">ログイン</div></div></button>
-        <button class="ubtn" onclick="lsSelectUser('杉山')"><div class="uav" style="background:#BE185D">杉</div><div><div class="ubtn-name">杉山</div><div class="ubtn-sub">ログイン</div></div></button>
       </div>
     </div>
   </div>
@@ -340,6 +394,15 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4"/><path d="M7 7v3M9 7v3"/></svg>
       ゴミ箱 <span id="tbtn" style="font-family:monospace;font-size:11px;background:var(--red-bg);color:var(--red);padding:1px 6px;border-radius:20px;margin-left:2px">0</span>
     </button>
+    <button class="btn btn-ghost btn-sm" onclick="openMonthCal()" title="月次カレンダー">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="12" rx="2"/><path d="M5 1v3M11 1v3M1.5 6.5h13"/></svg>
+      カレンダー
+    </button>
+    <button class="btn btn-ghost btn-sm update-btn" onclick="openChangelog()" id="cl-btn" title="アップデート履歴">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8.2l2.3 2.3"/></svg>
+      更新履歴
+      <span class="update-dot" id="cl-dot"></span>
+    </button>
     <button class="btn btn-ghost btn-sm" onclick="openSettings()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
       設定
@@ -359,7 +422,6 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   <div class="stat"><span class="dot" style="background:#6B35C8"></span>早川 <span class="num" id="st4">0</span></div>
   <div class="stat"><span class="dot" style="background:#A05C00"></span>小田切 <span class="num" id="st5">0</span></div>
   <div class="stat"><span class="dot" style="background:#0E7490"></span>早坂 <span class="num" id="st6">0</span></div>
-  <div class="stat"><span class="dot" style="background:#BE185D"></span>杉山 <span class="num" id="st7">0</span></div>
   <div class="sep"></div>
   <div class="stat"><span class="dot" style="background:var(--pri-high)"></span>高優先度 <span class="num" id="st8">0</span></div>
   <div class="stat"><span class="dot" style="background:var(--amber)"></span>今日期限 <span class="num" id="st9">0</span></div>
@@ -416,14 +478,6 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       <div class="sort-bar"><button class="sort-btn" onclick="setSort('f','created',this)">追加順</button><button class="sort-btn" onclick="setSort('f','priority',this)">優先度順</button><button class="sort-btn active" onclick="setSort('f','due',this)">期限順</button></div>
       <div class="col-body" id="cf"></div>
     </div>
-    <div class="col">
-      <div class="col-header" style="border-top:3px solid #BE185D">
-        <div class="col-title" onclick="openMemberCalendar('杉山',event)"><div class="avatar" style="background:#BE185D">杉</div>杉山</div>
-        <span class="col-cnt" style="background:#fcd4e8;color:#BE185D" id="cg0">0</span>
-      </div>
-      <div class="sort-bar"><button class="sort-btn" onclick="setSort('g','created',this)">追加順</button><button class="sort-btn" onclick="setSort('g','priority',this)">優先度順</button><button class="sort-btn active" onclick="setSort('g','due',this)">期限順</button></div>
-      <div class="col-body" id="cg"></div>
-    </div>
   </div>
 </div>
 <!-- Task Modal -->
@@ -448,7 +502,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         </div>
       </div>
     </div>
-    <div class="form-row" style="margin-top:13px"><label class="lbl">担当者 <span style="color:var(--red)">*</span></label><div class="sel-w"><select id="fa"><option value="">未定</option><option value="鈴木">鈴木</option><option value="十文字">十文字</option><option value="井上">井上</option><option value="早川">早川</option><option value="小田切">小田切</option><option value="早坂">早坂</option><option value="杉山">杉山</option></select></div></div>
+    <div class="form-row" style="margin-top:13px"><label class="lbl">担当者 <span style="color:var(--red)">*</span></label><div class="sel-w"><select id="fa"><option value="">未定</option><option value="鈴木">鈴木</option><option value="十文字">十文字</option><option value="井上">井上</option><option value="早川">早川</option><option value="小田切">小田切</option><option value="早坂">早坂</option></select></div></div>
     <div class="form-row">
       <label class="lbl">添付リンク（Googleドライブ等）</label>
       <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:6px;margin-bottom:6px">
@@ -557,10 +611,53 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   </div>
 </div>
 
+<!-- Calendar Modal -->
+<div class="overlay cal-overlay" id="cal-overlay" onclick="if(event.target===this)closeMonthCal()">
+  <div class="cal-modal">
+    <div class="cal-head">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calMove(-1)">‹</button>
+        <div class="cal-month-label" id="cal-label"></div>
+        <button class="cal-nav-btn" onclick="calMove(1)">›</button>
+        <button class="btn btn-ghost btn-sm" onclick="calGoToday()" style="margin-left:4px">今日</button>
+      </div>
+      <button style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px" onclick="closeMonthCal()">×</button>
+    </div>
+    <div class="cal-body" id="cal-body"></div>
+    <div class="cal-legend" id="cal-legend"></div>
+  </div>
+</div>
+<!-- Streak HUD -->
+<div class="streak-hud" id="streak-hud">
+  <div class="streak-chip" id="streak-chip">
+    <span id="streak-emoji">🔥</span>
+    <span id="streak-label">3連続！</span>
+  </div>
+  <div class="streak-bar-wrap"><div class="streak-bar-fill" id="streak-bar" style="width:30%"></div></div>
+</div>
+<!-- Changelog Modal -->
+<div class="overlay" id="cl-overlay" onclick="if(event.target===this)closeChangelog()">
+  <div class="cl-modal">
+    <div class="cl-head">
+      <div style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px">🆕 アップデート履歴</div>
+      <button style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text3);line-height:1;padding:0 4px" onclick="closeChangelog()">×</button>
+    </div>
+    <div class="cl-body" id="cl-body">
+      <div style="text-align:center;padding:40px;color:var(--text3);font-size:13px">読み込み中...</div>
+    </div>
+    <div class="cl-foot">
+      <span style="font-size:12px;color:var(--text3);margin-right:auto">変更内容は設定画面から追加できます</span>
+    </div>
+  </div>
+</div>
 <!-- Settings Modal -->
 <div class="overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
   <div class="modal" style="width:480px">
     <div class="modal-title">設定</div>
+    <div class="ss">
+      <div class="st">🔔 デスクトップ通知</div>
+      <div id="notif-perm-status" style="padding:12px 14px"></div>
+    </div>
     <div class="ss">
       <div class="st">カラーテーマ</div>
       <div class="sr"><div class="srlbl">アクセントカラー</div><div class="swatches" id="swatches"></div></div>
@@ -581,6 +678,20 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       <div style="padding:9px 14px 8px;font-size:12px;color:var(--text2);line-height:1.5">タスク追加時にSlack通知を送ります。各メンバーのチャンネルの<a href="https://api.slack.com/apps" target="_blank" style="color:var(--accent)">Incoming Webhook URL</a>を入力してください。</div>
       <div id="slack-webhook-list"></div>
     </div>
+    <div class="ss">
+      <div class="st">🆕 アップデートをメンバーへ通知</div>
+      <div style="padding:10px 14px 4px;font-size:12px;color:var(--text2);line-height:1.6;background:var(--accent-bg);border-bottom:1px solid var(--border)">
+        💡 コードの <code style="background:var(--surface);padding:1px 5px;border-radius:4px;font-size:11px">CHANGELOG_DEF</code> 配列に追記してGitHubにコミットするだけで自動通知されます。<br>
+        緊急の告知など、コード変更なしに追加したい場合のみ以下を使ってください。
+      </div>
+      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+        <input type="text" class="inp" id="cl-in-title" placeholder="タイトル（例：緊急メンテナンス告知）" style="font-size:13px;padding:8px 10px">
+        <textarea class="inp" id="cl-in-items" rows="3" placeholder="・内容1&#10;・内容2" style="font-size:12.5px;padding:8px 10px;resize:vertical"></textarea>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="addChangelogEntry()">メンバーへ通知する</button>
+        </div>
+      </div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeSettings()">キャンセル</button>
       <button class="btn btn-primary" onclick="saveSettings()">保存して適用</button>
@@ -597,7 +708,6 @@ const MEMBERS=[
   {name:'早川',  key:'d', color:'#6B35C8', ch:'早'},
   {name:'小田切',key:'e', color:'#A05C00', ch:'小'},
   {name:'早坂',  key:'f', color:'#0E7490', ch:'坂'},
-  {name:'杉山',  key:'g', color:'#BE185D', ch:'杉'},
 ];
 let tasks=[],trash=[],cats=[
   {id:"doc",  name:"資料作成",           color:"#3A5EE5"},
@@ -656,7 +766,7 @@ function updateStats(){
   document.getElementById("st10").textContent=weekDone;
 }
 
-const _colMap={a:{id:"ca",name:"鈴木",cnt:"ca0"},b:{id:"cb",name:"十文字",cnt:"cb0"},c:{id:"cc",name:"井上",cnt:"cc0"},d:{id:"cd",name:"早川",cnt:"cd0"},e:{id:"ce",name:"小田切",cnt:"ce0"},f:{id:"cf",name:"早坂",cnt:"cf0"},g:{id:"cg",name:"杉山",cnt:"cg0"}};
+const _colMap={a:{id:"ca",name:"鈴木",cnt:"ca0"},b:{id:"cb",name:"十文字",cnt:"cb0"},c:{id:"cc",name:"井上",cnt:"cc0"},d:{id:"cd",name:"早川",cnt:"cd0"},e:{id:"ce",name:"小田切",cnt:"ce0"},f:{id:"cf",name:"早坂",cnt:"cf0"}};
 
 function renderCol(colKey){
   const col=_colMap[colKey];const el=document.getElementById(col.id);
@@ -690,7 +800,7 @@ function cardHTML(t,i){
   const stCls=ST_CLS[t.status||"todo"]||"st-todo";
   const stLabel=ST_LABEL[t.status||"todo"]||"未着手";
   return `<div class="card ${specialClass}" id="tc${t.id}" style="animation-delay:${i*15}ms" onclick="openDetail(${t.id})">
-    <div class="pri-strip spn"></div>
+    <div class="pri-strip sp${t.priority||'n'}"></div>
     <div class="card-inner">
       <div class="card-top">
         <button class="check" onclick="event.stopPropagation();complete(${t.id})">
@@ -752,37 +862,150 @@ function renderTrash(){
 function toggleTrash(){showTrash=!showTrash;refresh();}
 function goHome(){if(showTrash){showTrash=false;refresh();}}
 
-let _streak=0,_streakTimer=null;
+let _streak=0,_streakTimer=null,_todayDone=0;
+const STREAK_MILESTONES=[3,5,10,15,20,30,50];
+const STREAK_CONFIG={
+  3:{emoji:"⚡",label:"3連続！",sub:"調子いいね！"},
+  5:{emoji:"🔥",label:"5連続！",sub:"ノリに乗ってる！"},
+  10:{emoji:"💥",label:"10連続！！",sub:"完了マシン爆誕"},
+  15:{emoji:"🚀",label:"15連続！！",sub:"チームMVP候補"},
+  20:{emoji:"👑",label:"20連続！！！",sub:"伝説の完了マシン"},
+  30:{emoji:"🏆",label:"30連続！！！",sub:"もはや神"},
+  50:{emoji:"🌟",label:"50連続！！！！",sub:"人類の限界を超えた"},
+};
 function complete(id){
   const card=document.getElementById("tc"+id);if(!card)return;
-  _streak++;clearTimeout(_streakTimer);
-  _streakTimer=setTimeout(()=>{_streak=0;},12000);
-  // フェーズ1：グリーンチェック表示
+  _streak++;_todayDone++;
+  clearTimeout(_streakTimer);
+  _streakTimer=setTimeout(()=>{
+    _streak=0;
+    updateStreakHud();
+  },15000);
   card.classList.add("card-completing");
-  // フェーズ2：カードを消す
-  setTimeout(()=>{
-    card.classList.remove("card-completing");
-    card.classList.add("card-vanish");
-  },380);
-  // データ削除
+  setTimeout(()=>{card.classList.remove("card-completing");card.classList.add("card-vanish");},380);
   setTimeout(()=>{
     const t=tasks.find(t=>t.id===id);if(!t)return;
     t.deletedAt=new Date().toLocaleDateString("ja-JP");
     t.deletedAtISO=today();
     saveTrash(t);delTask(id);
   },700);
-  // トースト表示
   showDoneToast(_streak);
+  updateStreakHud();
+  if(STREAK_MILESTONES.includes(_streak))showMilestone(_streak);
+}
+function updateStreakHud(){
+  const hud=document.getElementById("streak-hud");
+  const chip=document.getElementById("streak-chip");
+  const lbl=document.getElementById("streak-label");
+  const em=document.getElementById("streak-emoji");
+  const bar=document.getElementById("streak-bar");
+  if(!hud)return;
+  if(_streak<2){hud.classList.remove("show");return;}
+  hud.classList.add("show");
+  const cfg=STREAK_CONFIG[_streak]||{emoji:_streak>=10?"🔥":"⚡",label:`${_streak}連続！`};
+  em.textContent=cfg.emoji;
+  lbl.textContent=cfg.label||`${_streak}連続！`;
+  // バーは次のマイルストーンまでの進捗
+  const milestones=[3,5,10,15,20,30,50];
+  const next=milestones.find(m=>m>_streak)||50;
+  const prev=milestones.filter(m=>m<=_streak).pop()||0;
+  const pct=Math.min(100,(((_streak-prev)/(next-prev))*100));
+  bar.style.width=pct+"%";
+  // グラデーションを連続数に応じて変える
+  const g=_streak>=20?"linear-gradient(135deg,#7C3AED,#DB2777)":_streak>=10?"linear-gradient(135deg,#DC2626,#FF6B00)":"linear-gradient(135deg,#FF6B00,#FF3366)";
+  chip.style.background=g;
+}
+function showMilestone(streak){
+  const cfg=STREAK_CONFIG[streak];if(!cfg)return;
+  const el=document.createElement("div");el.className="milestone-pop";
+  el.innerHTML=`<div class="milestone-inner"><span class="milestone-emoji">${cfg.emoji}</span><div class="milestone-text">${cfg.label}</div><div class="milestone-sub">${cfg.sub||""}</div></div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+  // デスクトップ通知も
+  sendDesktopNotif(`${cfg.emoji} ${cfg.label}`,cfg.sub||"","streak-"+streak);
 }
 function showDoneToast(streak){
-  const old=document.querySelector(".done-toast");if(old){old.remove();}
+  const old=document.querySelector(".done-toast");if(old)old.remove();
   const el=document.createElement("div");el.className="done-toast";
-  if(streak>=10)el.textContent=`✅ 完了！　🏆 ${streak}連続達成！`;
-  else if(streak>=5)el.textContent=`✅ 完了！　🔥 ${streak}連続！`;
-  else if(streak>=3)el.textContent=`✅ 完了！　⚡ ${streak}連続！`;
+  if(streak>=10)el.textContent=`✅ 完了！　${_todayDone}件達成！`;
+  else if(streak>=5)el.textContent="✅ 完了！　🔥 絶好調！";
+  else if(streak>=3)el.textContent="✅ 完了！　⚡ 勢いある！";
   else el.textContent="✅ 完了！";
   document.body.appendChild(el);
   setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),230);},1600);
+}
+
+// ── 月次カレンダー ──
+let _monthCalYear=new Date().getFullYear(),_monthCalMonth=new Date().getMonth();
+function openMonthCal(){
+  _monthCalYear=new Date().getFullYear();_monthCalMonth=new Date().getMonth();
+  renderMonthCal();
+  document.getElementById("cal-overlay").classList.add("open");
+}
+function closeMonthCal(){document.getElementById("cal-overlay").classList.remove("open");}
+function calMove(d){_monthCalMonth+=d;if(_monthCalMonth<0){_monthCalMonth=11;_monthCalYear--;}if(_monthCalMonth>11){_monthCalMonth=0;_monthCalYear++;}renderMonthCal();}
+function calGoToday(){_monthCalYear=new Date().getFullYear();_monthCalMonth=new Date().getMonth();renderMonthCal();}
+function renderMonthCal(){
+  const label=document.getElementById("cal-label");
+  const body=document.getElementById("cal-body");
+  const legend=document.getElementById("cal-legend");
+  if(!label||!body)return;
+  label.textContent=`${_monthCalYear}年 ${_monthCalMonth+1}月`;
+  // タスクを期限日でグループ化
+  const byDate={};
+  tasks.forEach(t=>{
+    if(t.due){
+      if(!byDate[t.due])byDate[t.due]=[];
+      byDate[t.due].push(t);
+    }
+  });
+  // カレンダーグリッド生成
+  const firstDay=new Date(_monthCalYear,_monthCalMonth,1);
+  const lastDay=new Date(_monthCalYear,_monthCalMonth+1,0);
+  const startDow=(firstDay.getDay()+6)%7; // 月曜始まり
+  const todayStr=today();
+  const WD=["月","火","水","木","金","土","日"];
+  let html=`<div class="cal-weekdays">${WD.map((w,i)=>`<div class="cal-wd" style="${i===5?"color:#3A5EE5":i===6?"color:#C0253A":""}">${w}</div>`).join("")}</div><div class="cal-grid">`;
+  // 前月の空白
+  for(let i=0;i<startDow;i++){
+    const d=new Date(_monthCalYear,_monthCalMonth,1-startDow+i);
+    const ds=d.toISOString().split("T")[0];
+    const dayTasks=byDate[ds]||[];
+    html+=calDayHTML(d.getDate(),ds,dayTasks,true);
+  }
+  // 当月
+  for(let d=1;d<=lastDay.getDate();d++){
+    const ds=`${_monthCalYear}-${String(_monthCalMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const dayTasks=byDate[ds]||[];
+    const isToday=ds===todayStr;
+    html+=calDayHTML(d,ds,dayTasks,false,isToday);
+  }
+  // 後月の空白
+  const total=startDow+lastDay.getDate();
+  const rem=(7-total%7)%7;
+  for(let i=1;i<=rem;i++){
+    const d=new Date(_monthCalYear,_monthCalMonth+1,i);
+    const ds=d.toISOString().split("T")[0];
+    const dayTasks=byDate[ds]||[];
+    html+=calDayHTML(i,ds,dayTasks,true);
+  }
+  html+="</div>";
+  body.innerHTML=html;
+  // 凡例
+  legend.innerHTML=MEMBERS.map(m=>`<div class="cal-legend-item"><div class="cal-legend-dot" style="background:${m.color}"></div>${m.name}</div>`).join("");
+}
+function calDayHTML(day,ds,dayTasks,otherMonth,isToday=false){
+  const cls=(isToday?"today ":"")+(otherMonth?"other-month ":"");
+  const MAX_SHOW=3;
+  const shown=dayTasks.slice(0,MAX_SHOW);
+  const more=dayTasks.length-MAX_SHOW;
+  const dots=shown.map(t=>{
+    const m=MEMBERS.find(m=>m.name===t.assignee);
+    const col=m?m.color:"#888";
+    return `<div class="cal-task-dot" style="background:${col}18;color:${col}" onclick="openDetail(${t.id})" title="${esc(t.name)}">${esc(t.name)}</div>`;
+  }).join("");
+  const moreHtml=more>0?`<div class="cal-more">+${more}件</div>`:"";
+  return `<div class="cal-day ${cls}"><div class="cal-day-num"><span>${day}</span>${dayTasks.length?`<span style="font-size:9px;background:var(--accent-bg);color:var(--accent);padding:0 4px;border-radius:8px;font-weight:700">${dayTasks.length}</span>`:""}</div>${dots}${moreHtml}</div>`;
 }
 
 function toTrash(id){
@@ -943,6 +1166,133 @@ const SEASON_THEMES={
   12:{g:"linear-gradient(135deg,#15803D,#22C55E)",bell:"🎄",sub:"メリークリスマス🎅",deco:["🎄","⛄","🎅","✨","🎁"]},
 };
 
+// ── アップデート定義（デプロイ時にここに追記するだけでメンバーへ自動通知）──
+// createdAt は YYYYMMDD 形式の数値（大きいほど新しい）
+const CHANGELOG_DEF=[
+  {
+    id:"v20260609",
+    date:"2026-06-09",
+    title:"UI全面改善・通知機能強化",
+    items:"・杉山列を削除\n・カンバン横スクロール対応\n・各列が独立スクロール\n・優先度カラー表示（左端の帯）\n・デスクトップ通知を設定から許可可能に\n・更新履歴の自動通知機能を追加\n・フォント変更（游ゴシック）",
+    createdAt:20260609
+  }
+];
+// ↑ 新バージョンをリリースするときは、↑ この配列の先頭に新しいオブジェクトを追加してGitHubにコミットするだけでOK
+
+// ── アップデート通知 (Changelog) ──
+let _changelog=[];
+let _clSeenAt=parseInt(localStorage.getItem("cl_seen")||"0");
+let _clInitialized=false;
+
+function initChangelog(){
+  if(!_dbReady)return;
+  // Firebase側の手動追加エントリも合わせて表示
+  _onValue(_ref(_db,"team3/changelog"),snap=>{
+    const fbVal=snap.val()||{};
+    const fbEntries=Object.entries(fbVal).map(([id,v])=>({...v,_id:id}));
+    // CHANGELOG_DEFのidと重複しないFBエントリだけ追加
+    const defIds=new Set(CHANGELOG_DEF.map(e=>e.id));
+    const prev=_changelog.map(c=>c.createdAt);
+    _changelog=[
+      ...CHANGELOG_DEF,
+      ...fbEntries.filter(e=>!defIds.has(e._id||e.id))
+    ].sort((a,b)=>b.createdAt-a.createdAt);
+    _updateClDot();
+    // 初回ロード後にFirebaseへ手動追加されたエントリがあればOS通知
+    if(_clInitialized){
+      const newFb=fbEntries.filter(c=>!prev.includes(c.createdAt)&&c.createdAt>_clSeenAt);
+      newFb.forEach(c=>{
+        sendDesktopNotif(`🆕 ダッシュボードが更新されました`,c.title+(c.items?"\n"+c.items.split("\n")[0]:""),"cl-"+c.createdAt);
+      });
+    }
+    _clInitialized=true;
+  });
+}
+
+function _updateClDot(){
+  const dot=document.getElementById("cl-dot");
+  if(!dot)return;
+  const hasNew=_changelog.some(c=>c.createdAt>_clSeenAt);
+  dot.classList.toggle("show",hasNew);
+}
+
+function openChangelog(){
+  document.getElementById("cl-overlay").classList.add("open");
+  renderChangelog();
+}
+
+function closeChangelog(){
+  document.getElementById("cl-overlay").classList.remove("open");
+  // 閉じたら既読にする
+  if(_changelog.length){
+    const maxAt=Math.max(..._changelog.map(c=>c.createdAt));
+    if(maxAt>_clSeenAt){
+      _clSeenAt=maxAt;
+      localStorage.setItem("cl_seen",String(maxAt));
+      _updateClDot();
+    }
+  }
+}
+
+function renderChangelog(){
+  const body=document.getElementById("cl-body");
+  if(!body)return;
+  if(!_changelog.length){
+    body.innerHTML='<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:13px">アップデート履歴はまだありません</div>';
+    return;
+  }
+  const total=_changelog.length;
+  body.innerHTML=_changelog.map((c,i)=>{
+    const isNew=c.createdAt>_clSeenAt;
+    return `<div class="cl-entry">
+      <div class="cl-entry-head">
+        <span class="cl-ver-badge">v${total-i}</span>
+        <span class="cl-entry-date">${c.date||""}</span>
+        ${isNew?'<span class="cl-new-badge">NEW</span>':""}
+      </div>
+      <div class="cl-entry-title">${esc(c.title||"アップデート")}</div>
+      ${c.items?`<div class="cl-entry-items">${esc(c.items)}</div>`:""}
+    </div>`;
+  }).join("");
+}
+
+function addChangelogEntry(){
+  const title=document.getElementById("cl-in-title").value.trim();
+  const items=document.getElementById("cl-in-items").value.trim();
+  if(!title){alert("タイトルを入力してください");return;}
+  const entry={
+    title,
+    items,
+    date:new Date().toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"}),
+    createdAt:Date.now()
+  };
+  fbSet("team3/changelog/cl_"+Date.now(),entry);
+  document.getElementById("cl-in-title").value="";
+  document.getElementById("cl-in-items").value="";
+  alert("✅ 追加しました！メンバーの更新履歴に赤丸が表示されます");
+}
+
+// ── デスクトップ通知 ──
+function requestDesktopNotifPermission(){
+  if(!("Notification" in window))return;
+  if(Notification.permission==="default"){
+    Notification.requestPermission();
+  }
+}
+function sendDesktopNotif(title,body,tag){
+  if(!("Notification" in window)||Notification.permission!=="granted")return;
+  try{
+    const n=new Notification(title,{
+      body:body||"",
+      icon:"https://suzukiminori-glitch.github.io/team3-dashboard/icon.png",
+      tag:tag||"task-notif",
+      requireInteraction:false
+    });
+    n.onclick=function(){window.focus();n.close();};
+    setTimeout(()=>n.close(),10000);
+  }catch(e){}
+}
+
 // ── 新着タスク通知 ──
 let _currentUser=null;
 let _notifIds=[];
@@ -995,6 +1345,17 @@ function showNewTaskNotification(notifs,username){
     </div>`;
   }).join("");
   document.getElementById("notif-overlay").classList.add("open");
+  // デスクトップ通知も送信
+  const priMap2={high:"🔴 高優先度",mid:"🟡 中優先度",low:"🟢 低優先度"};
+  notifs.forEach(n=>{
+    const due2=n.due?fmtDue(n.due):null;
+    const bodyParts=[
+      n.priority?priMap2[n.priority]:"",
+      due2?"期限: "+due2.label:"",
+      n.memo?n.memo:""
+    ].filter(Boolean);
+    sendDesktopNotif(`📋 新着タスク: ${n.name}`,bodyParts.join(" ／ ")||"タスクが割り当てられました","task-"+(n.id||Date.now()));
+  });
 }
 
 function dismissNotifications(){
@@ -1018,7 +1379,50 @@ function sendSlackNotif(task){
 
 function openSettings(){
   document.getElementById("swatches").innerHTML=ACCENTS.map(a=>`<div class="sw ${appCfg.accent===a?"sel":""}" style="background:${a}" onclick="pickAccent('${a}',this)"></div>`).join("");
-  renderCatList();renderSlackWebhooks();document.getElementById("settings-modal").classList.add("open");
+  renderCatList();renderSlackWebhooks();renderNotifPermStatus();document.getElementById("settings-modal").classList.add("open");
+}
+
+function renderNotifPermStatus(){
+  const el=document.getElementById("notif-perm-status");
+  if(!el)return;
+  if(!("Notification" in window)){
+    el.innerHTML='<div style="font-size:12.5px;color:var(--text3)">このブラウザはデスクトップ通知に対応していません</div>';
+    return;
+  }
+  const p=Notification.permission;
+  if(p==="granted"){
+    el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <span style="font-size:13px;color:var(--green);font-weight:600">✅ 通知が許可されています</span>
+      <button class="btn btn-ghost btn-sm" onclick="testDesktopNotif()">テスト送信</button>
+    </div>`;
+  }else if(p==="denied"){
+    el.innerHTML=`<div style="font-size:12.5px;color:var(--red);line-height:1.7">
+      ❌ 通知がブロックされています。<br>
+      ブラウザのアドレスバー左の 🔒 をクリック → <strong>通知</strong> → <strong>許可</strong> に変更してください。
+    </div>`;
+  }else{
+    el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <span style="font-size:13px;color:var(--text2)">タスク追加時にパソコン右下に通知が届きます</span>
+      <button class="btn btn-primary btn-sm" onclick="enableDesktopNotif()">通知を許可する</button>
+    </div>`;
+  }
+}
+
+function enableDesktopNotif(){
+  if(!("Notification" in window))return;
+  Notification.requestPermission().then(p=>{
+    renderNotifPermStatus();
+    if(p==="granted"){
+      new Notification("✅ 通知が有効になりました",{
+        body:"タスクが追加されたときにここに通知が届きます",
+        icon:"https://suzukiminori-glitch.github.io/team3-dashboard/icon.png"
+      });
+    }
+  });
+}
+
+function testDesktopNotif(){
+  sendDesktopNotif("📋 テスト通知","タスク通知はこのように表示されます","test-notif");
 }
 function closeSettings(){document.getElementById("settings-modal").classList.remove("open");}
 function renderSlackWebhooks(){
@@ -1131,6 +1535,8 @@ function initFirebase(){
     const val=snap.val();if(val&&typeof val==="object")_authData=val;
     if(!_authLoaded){_checkSession();}
   });
+  // アップデート通知
+  initChangelog();
 }
 if(window._fbReady)initFirebase();
 else window.addEventListener("fb-ready",initFirebase);
@@ -1142,10 +1548,21 @@ const SESSION_MS=2*24*60*60*1000;
 let _authData={};
 let _lsUser=null;
 let _authLoaded=false;
-async function _sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function _sha256(s){
+  if(window.crypto&&window.crypto.subtle){
+    try{
+      const b=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+      return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+    }catch(e){}
+  }
+  // フォールバック：crypto.subtleが使えない環境用
+  let h1=5381,h2=52711;
+  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=(h1*33^c)>>>0;h2=(h2*33^c*7)>>>0;}
+  return(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0')+s.length.toString(16).padStart(4,'0');
+}
 function _getSession(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'null');}catch{return null;}}
 function _setSession(uid,lid){localStorage.setItem(LS_KEY,JSON.stringify({userId:uid,loginId:lid,loginTime:Date.now()}));}
-const _UC={'鈴木':{bg:'#3A5EE5',ch:'鈴'},'十文字':{bg:'#1A7A50',ch:'十'},'井上':{bg:'#C0253A',ch:'井'},'早川':{bg:'#6B35C8',ch:'早'},'小田切':{bg:'#A05C00',ch:'小'},'早坂':{bg:'#0E7490',ch:'坂'},'杉山':{bg:'#BE185D',ch:'杉'}};
+const _UC={'鈴木':{bg:'#3A5EE5',ch:'鈴'},'十文字':{bg:'#1A7A50',ch:'十'},'井上':{bg:'#C0253A',ch:'井'},'早川':{bg:'#6B35C8',ch:'早'},'小田切':{bg:'#A05C00',ch:'小'},'早坂':{bg:'#0E7490',ch:'坂'}};
 
 function _checkSession(){
   // ★ loadingは auth読込後に呼ばれるので、ここで非表示
@@ -1155,6 +1572,7 @@ function _checkSession(){
   if(valid){
     _setSession(s.userId,s.loginId);
     document.getElementById('login-overlay').classList.add('hidden');
+    requestDesktopNotifPermission();
     initUserNotifications(s.userId);
   }else if(s&&!valid){
     lsSelectUser(s.userId,true);
@@ -1187,7 +1605,7 @@ function lsSelectUser(uid,expired=false){
   }
 }
 function lsBack(){document.getElementById('ls-step2').style.display='none';document.getElementById('ls-step1').style.display='';_lsUser=null;}
-function _lsErr(msg){const e=document.getElementById('ls-err');e.textContent=msg;e.style.display='';setTimeout(()=>e.style.display='none',3500);}
+function _lsErr(msg){const e=document.getElementById('ls-err');e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',3500);}
 
 async function lsSubmitLogin(){
   const btn=document.getElementById('ls-login-btn');
@@ -1203,7 +1621,11 @@ async function lsSubmitLogin(){
     if(h!==st.passwordHash){_lsErr('パスワードが正しくありません');return;}
     _setSession(_lsUser,lid);
     document.getElementById('login-overlay').classList.add('hidden');
-    initUserNotifications(_lsUser);
+    try{requestDesktopNotifPermission();}catch(e){}
+    try{initUserNotifications(_lsUser);}catch(e){}
+  }catch(e){
+    _lsErr('エラー: '+(e&&e.message?e.message:'不明なエラー'));
+    console.error('lsSubmitLogin error:',e);
   }finally{btn.disabled=false;btn.textContent='ログイン';}
 }
 
@@ -1223,7 +1645,11 @@ async function lsSubmitSetup(){
     _authData[_lsUser]=entry;
     _setSession(_lsUser,sid);
     document.getElementById('login-overlay').classList.add('hidden');
-    initUserNotifications(_lsUser);
+    try{requestDesktopNotifPermission();}catch(e){}
+    try{initUserNotifications(_lsUser);}catch(e){}
+  }catch(e){
+    _lsErr('エラー: '+(e&&e.message?e.message:'不明なエラー'));
+    console.error('lsSubmitSetup error:',e);
   }finally{btn.disabled=false;btn.textContent='設定して開始';}
 }
 
