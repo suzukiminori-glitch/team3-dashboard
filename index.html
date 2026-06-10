@@ -376,8 +376,8 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       <div id="ls-form-setup" style="display:none">
         <div class="ltitle">初回設定</div>
         <div class="lfirst-info">初めてのログインです。ログインIDとパスワードを設定してください。</div>
-        <div class="form-row"><label class="lbl">ログインID</label><input type="text" class="inp" id="ls-sid" placeholder="メールアドレスや任意のID" autocomplete="username"></div>
-        <div class="form-row"><label class="lbl">パスワード</label><input type="password" class="inp" id="ls-spass" placeholder="4文字以上" autocomplete="new-password"></div>
+        <div class="form-row"><label class="lbl">ログインID</label><input type="email" class="inp" id="ls-sid" placeholder="xxx@gmotech.jp" autocomplete="username"></div>
+        <div class="form-row"><label class="lbl">パスワード</label><input type="password" class="inp" id="ls-spass" placeholder="6文字以上" autocomplete="new-password"></div>
         <div class="form-row" style="margin-bottom:0"><label class="lbl">パスワード（確認）</label><input type="password" class="inp" id="ls-spass2" placeholder="もう一度入力" autocomplete="new-password"></div>
         <button class="full-btn" id="ls-setup-btn" onclick="lsSubmitSetup()">設定して開始</button>
       </div>
@@ -1562,6 +1562,13 @@ async function _sha256(s){
 }
 function _getSession(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'null');}catch{return null;}}
 function _setSession(uid,lid){localStorage.setItem(LS_KEY,JSON.stringify({userId:uid,loginId:lid,loginTime:Date.now()}));}
+function _logAccess(uid,lid,action){
+  try{
+    const ts=Date.now();
+    const key='log_'+ts+'_'+uid;
+    fbSet('team3/access_log/'+key,{user:uid,loginId:lid||'',action:action,ts:ts,date:new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})});
+  }catch(e){}
+}
 const _UC={'鈴木':{bg:'#3A5EE5',ch:'鈴'},'十文字':{bg:'#1A7A50',ch:'十'},'井上':{bg:'#C0253A',ch:'井'},'早川':{bg:'#6B35C8',ch:'早'},'小田切':{bg:'#A05C00',ch:'小'},'早坂':{bg:'#0E7490',ch:'坂'}};
 
 function _checkSession(){
@@ -1620,6 +1627,7 @@ async function lsSubmitLogin(){
     const h=await _sha256(lp);
     if(h!==st.passwordHash){_lsErr('パスワードが正しくありません');return;}
     _setSession(_lsUser,lid);
+    _logAccess(_lsUser,lid,'login');
     document.getElementById('login-overlay').classList.add('hidden');
     try{requestDesktopNotifPermission();}catch(e){}
     try{initUserNotifications(_lsUser);}catch(e){}
@@ -1637,13 +1645,15 @@ async function lsSubmitSetup(){
     const sp=document.getElementById('ls-spass').value;
     const sp2=document.getElementById('ls-spass2').value;
     if(!sid){_lsErr('ログインIDを入力してください');return;}
-    if(sp.length<4){_lsErr('パスワードは4文字以上で設定してください');return;}
+    if(!sid.toLowerCase().endsWith('@gmotech.jp')){_lsErr('ログインIDは @gmotech.jp のメールアドレスを使用してください');return;}
+    if(sp.length<6){_lsErr('パスワードは6文字以上で設定してください');return;}
     if(sp!==sp2){_lsErr('パスワードが一致しません');return;}
     const h=await _sha256(sp);
     const entry={loginId:sid,passwordHash:h};
     fbSet('team3/auth/'+_lsUser,entry);
     _authData[_lsUser]=entry;
     _setSession(_lsUser,sid);
+    _logAccess(_lsUser,sid,'initial_setup');
     document.getElementById('login-overlay').classList.add('hidden');
     try{requestDesktopNotifPermission();}catch(e){}
     try{initUserNotifications(_lsUser);}catch(e){}
