@@ -701,6 +701,7 @@ const MEMBERS=[
 let tasks=[],trash=[],cats=[
   {id:"doc",  name:"資料作成",           color:"#3A5EE5"},
   {id:"est",  name:"見積書作成",         color:"#1A7A50"},
+  {id:"apply",name:"申込書作成",         color:"#C2410C"},
   {id:"sf",   name:"SF申請",             color:"#0E7490"},
   {id:"credit",name:"与信WF申請",        color:"#A05C00"},
   {id:"irreg",name:"イレギュラーWF申請", color:"#C0253A"},
@@ -1516,7 +1517,7 @@ function initFirebase(){
   _writeQueue.length=0;
   _onValue(_ref(_db,"team3/tasks"),snap=>{const val=snap.val();const fbTasks=val?Object.values(val):[];const fbIds=new Set(fbTasks.map(t=>String(t.id)));tasks=fbTasks.concat([..._pendingTasks.values()].filter(t=>!fbIds.has(String(t.id))));refresh();});
   _onValue(_ref(_db,"team3/trash"),snap=>{const val=snap.val();trash=val?Object.values(val):[];refresh();});
-  _onValue(_ref(_db,"team3/cats"),snap=>{const val=snap.val();if(val&&Array.isArray(val))cats=val;else if(val&&typeof val==="object")cats=Object.values(val);if(!cats.find(c=>c.id==="thanks")){cats.push({id:"thanks",name:"お礼メール",color:"#0E7490"});fbSet("team3/cats",cats);}refresh();});
+  _onValue(_ref(_db,"team3/cats"),snap=>{const val=snap.val();if(val&&Array.isArray(val))cats=val;else if(val&&typeof val==="object")cats=Object.values(val);if(!cats.find(c=>c.id==="thanks")){cats.push({id:"thanks",name:"お礼メール",color:"#0E7490"});fbSet("team3/cats",cats);}if(!cats.find(c=>c.id==="apply")){cats.push({id:"apply",name:"申込書作成",color:"#C2410C"});fbSet("team3/cats",cats);}refresh();});
   _onValue(_ref(_db,"team3/cfg"),snap=>{const val=snap.val();if(val)appCfg=Object.assign(appCfg,val);applyAccent();});
   _onValue(_ref(_db,"team3/slack_cfg"),snap=>{const val=snap.val();if(val&&typeof val==="object")slackCfg=Object.assign({},val);});
   // ★ ログインバグ修正：auth読み込み後に_checkSessionを呼ぶ
